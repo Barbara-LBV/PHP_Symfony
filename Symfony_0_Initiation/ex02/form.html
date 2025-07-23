@@ -2,47 +2,97 @@
 <html>
     <head>
         <meta charset="utf-8" />
-        <title>Mon Formulaire</title>
+        <title>My Form</title>
+        <style>
+            body {
+              font-family: Trebuchet, sans-serif;
+              text-align: left;
+              margin:1;
+              margin-right: 50px;
+            }
+            h1, h2{
+                color: rgb(62, 62, 77);
+                text-align: left;
+                margin-left: 50px;
+                /* margin-right: 10px;
+                margin-bottom: 10px;
+                margin-top: 10px;*/
+            }
+            div {
+            margin-bottom: 10px;
+            } 
+            fieldset {
+              background-color: #e2e1e7;
+              font-family: Trebuchet, sans-serif;
+              text-align: left;
+              margin:3;
+            }
+            form {
+            max-width: 400px;
+            margin-left: 50px;
+            }
+
+            .form-group {
+            display: grid;
+            grid-template-columns: 150px 1fr;
+            gap: 5px;
+            margin-bottom: 15px;
+            align-items: left;
+            }
+            .form-group input[type="checkbox"] {
+                /* pour l'aligner verticalement avec le texte */
+            transform: translateX(-101px);
+            }
+        </style>
     </head>
     
     <body>
-        <h1>M</h1>
+        <h1>My Student Form</h1>
         
         <p>
             <form>
                 <fieldset>
-                    <label for="Firstname">Firstname</label>
-                    <input type="text" name="Firstname">
-
-                    <label for="Firstname">Name</label>
-                    <input type="text" name="Name">
-                    
-                    <label for="Firstname">Age</label>
-                    <input type="number" name="Age">
-                    
-                    <label for="Firstname">Email</label>
-                    <input type="email" name="Email">
-                    
-                    <label for="Student">Student at 42?</label>
-                    <input type="checkbox" name="Student">
-                    
+                    <div class="form-group">
+                        <label for="Firstname">Firstname</label>
+                        <input type="text" id="firstname" name="firstname">
+                    </div>
+                    <div class="form-group">
+                        <label for="Firstname">Name</label>
+                        <input type="text" id="name" name="name">
+                    </div>
+                    <div class="form-group">
+                        <label for="Firstname">Age</label>
+                        <input type="number" id="age" name="age">
+                    </div>
+                    <div class="form-group">
+                        <label for="Phone">Phone</label>
+                        <input type="number" id="phone" name="phone">
+                    </div>
+                    <div class="form-group">
+                        <label for="Email">Email</label>
+                        <input type="email" id="email" name="email">
+                    </div>
+                    <div class="form-group">
+                        <label for="student">Student at 42?</label>
+                        <input type="checkbox" id="student" name="student">
+                    </div>
                     <div>
-                        <input type="radio" id="genderPreference1" name="gender" value="male"/>
-                        <label for="genderPreference1">Male</label>
+                        <input type="radio" id="gender_male" name="gender_malegender" value="male"/>
+                        <label for="gender_male">Male</label>
 
-                        <input type="radio" id="genderPreference2" name="gender" value="female"/>
-                        <label for="genderPreference2">Female</label>
+                        <input type="radio" id="gender_female" name="gender_female" value="female"/>
+                        <label for="gender_female">Female</label>
 
-                        <input type="radio" id="genderPreference3" name="gender" value="other"/>
-                        <label for="genderPreference3">Other</label>
+                        <input type="radio" id="gender_other" name="gender_other" value="other"/>
+                        <label for="gender_other">Other</label>
                     </div>
 
                     <div>
-                        <button type="submit">Run the sexy JS!</button>
+                        <button type="button" onclick="displayFormContents()">Run the sexy JS!</button>
                     </div>
                 </fieldset>    
             </form>
         </p>
-
+        <script src="popup.js"></script>
     </body>
 </html>
