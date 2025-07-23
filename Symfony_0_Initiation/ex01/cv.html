@@ -1,16 +1,184 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <meta charset="utf-8" />
-        <title>Ma page web</title>
+        <meta charset="utf-8">
+        <title>CV Barbara LEFEBVRE</title>
+        <style>
+            body {
+              background-color: #e2e1e7;
+              font-family: Trebuchet, sans-serif;
+              text-align: left;
+              margin:1;
+              margin-right: 10px;
+            }
+            h1, h2{
+                color: rgb(62, 62, 77);
+                text-align: center;
+                margin: 5px;
+                margin-left: 300px;
+                margin-right: 10px;
+                margin-bottom: 10px;
+                margin-top: 10px;
+            }
+            h3, h4 {
+                color: rgb(62, 62, 77);
+                text-align: left;
+                margin: 5px;
+                /* margin-left: 330px; */
+                margin-right: 10px;
+                margin-bottom: 10px;
+                margin-top: 10px;
+            }
+            article {
+                color: rgb(62, 62, 77);
+                text-align: left;
+                /* margin-left: 330px; */
+                margin-right: 10px;
+            }
+            .interests {
+                color: rgb(62, 62, 77);
+                background-color: chocolate;
+                position:
+                text-align: left;
+                margin-left: 10px;
+                margin-top: 10px;
+                /* margin-right: 310px; */
+                width:300px;
+                border: 2px solid #424242; /* Bordure extérieure du tableau */
+                border-collapse: collapse;
+            }
+            table {
+            width: 60%;
+            margin: 10px auto;
+            margin-left: 330px;
+            border: 2px solid #424242; /* Bordure extérieure du tableau */
+            border-collapse: collapse;
+            }
+            th, td {
+            border: none; /* Pas de bordure sur les cellules */
+            padding: 10px;
+            text-align: left;
+            }
+        </style>
     </head>
-    
     <body>
-        <h1>Ma page web</h1>
-        
-        <p>
-            Bonjour <!-- Insérer le pseudo du visiteur ici --> !
+        <h1>Barbara LEFEBVRE</h1>
+        <h2>Alternance en Contrat Pro</h2>
+        <h3>Ancienne organisatrice de tournages, j’ai troqué les plateaux pour les lignes de code. Je cherche une alternance
+            où mettre ma logique, ma rigueur et mon énergie au service de projets passionnants.
+        </h3>
+        <h4>Coordonnées</h4>
+        <table>
+            <thead>
+              <tr>
+                <th>Adresse</th>
+                <th>Email</th>
+                <th>Téléphone</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Meudon, IDF</td>
+                <td>barbaralefebvre@ymail.co</td>
+                <td>06.99.35.28.10</td>
+              </tr>
+            </tbody>
+          </table>
+          <h4>Compétences Techniques</h4>
+          <table>
+              <thead>
+                <tr>
+                  <th>Domaine</th>
+                  <th>Technologies</th>
+                  <th>Niveau</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Développement Web</td>
+                  <td>HTML, CSS, JavaScript</td>
+                  <td>Intermédiaire</td>
+                </tr>
+                <tr>
+                  <td>Backend</td>
+                  <td>Python, Django</td>
+                  <td>Débutant</td>
+                </tr>
+                <tr>
+                  <td>Base de données</td>
+                  <td>PostgreSQL, SQL</td>
+                  <td>Intermédiaire</td>
+                </tr>
+                <tr>
+                  <td>Outils</td>
+                  <td>Git, Docker</td>
+                  <td>Débutant</td>
+                </tr>
+              </tbody>
+            </table>
+        <h4>Expériences</h4>
+        <article>
+            <ul>
+                <li><b>Développeuse Django  OOTI  nov. 2024 - avril 2025</b>
+                    <ul>
+                        <li>Correction de bugs avec implémentation de tests unitaires assurant une couverture de test de 80 à 100%.</li>
+                        <li>Optimisation de l'API en supprimant des urls obsolètes afin d’améliorer la fiabilité de l’application.</li>
+                        <li>Modernisation & Refactoring du code existant préparant le produit aux évolutions et améliorant sa qualité globale.</li>
+                    </ul>
+                </li>
+                <li><b>Chargée de Production  HL Production “La Maison France 5”    Juillet 2014 - Décembre 2021</b>
+                    <ul>
+                        <li>Organisation de tournages Plateaux/Rubriques France & étranger - 40 docs / an</li>
+                        <li>Tenue et mise à jour des Plannings de Production et de Postproduction</li>
+                        <li>Gestion des rubriques CHANGER - travaux d’aménagement d’intérieur chez des particuliers :
+                            <ul>
+                                <li>Recrutement de candidats, coordination du projet et des relations candidats, architectes & entrepreneurs</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </article>
+        <h4>Projets Informatiques</h4>
+        <article>
+            <ul>
+                <li><b>Jeu Pong Application en SPA en Django/JavaScript réalisé à 5</b>
+                    <ul>
+                        <li>Dashboards des stats des jeux et des utilisateurs, authentification native, avec JWT ou avec l’API de 42</li>
+                    </ul>
+                </li>
+                <li><b>Serveur IRC en C++, en binôme</b>
+                    <ul>
+                        <li>Protocole TCP/IP. Gestion des messages reçus des clients IRSSI</li>
+                        <li>Recodage de commandes/réponses serveur</li>                        </ul>
+                </li>
+                <li><b>Inception en C avec librairie visuelle de 42</b>
+                    <ul>
+                        <li>Pour un site WordPress, avec configuration des images des services Nginx, MariaDB, Wordpress, certificats SSL</li>
+                    </ul>
+                </li>
+                <li><b>Minishell Création d’un shell Bash en C, en binôme</b>                        
+                    <ul>
+                        <li>Parsing des données pour une exécution optimale des commandes Bash. Gestion des signaux.</li>
+                    </ul>
+                </li>
+            </ul>
+        </article>
+        <h4>Centres d'Intérêts</h4>
+        <div class="interests">Centres d'Intérêts</div>
+            <ul>
+                <li>Théâtre & Cinéma : une fois par semaine</li>
+                <li>Gym suédoise et Pilates “at home”, 4 séances par semaine</li>
+                <li>Pâtissière “rustique” : tartes, cookies, cakes…</li>
+                <li>CTF Hack’Her oct. 2024 - 4e place en équipe</li>
+            </ul>
         </p>
-
+        <h4>Sites</h4>
+        <p>
+            <ul>
+                <li><a href= "">LinkedIn</a></li>
+                <li><a href="">Github</a></li>
+            </ul>
+        </p>
     </body>
 </html>
