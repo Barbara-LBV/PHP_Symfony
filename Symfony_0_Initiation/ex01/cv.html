@@ -2,73 +2,87 @@
 <html>
     <head>
         <meta charset="utf-8">
-        <title>CV Barbara LEFEBVRE</title>
+        <title>My 42 CV</title>
         <style>
             body {
-              background-color: #e2e1e7;
+              background-color: #ffff;
               font-family: Trebuchet, sans-serif;
               text-align: left;
-              margin:1;
-              margin-right: 10px;
+              margin: 6;
+            }
+            fieldset {
+              background-color: #bed2ca;
+              font-family: Trebuchet, sans-serif;
+              text-align: left;
+              margin:6;
+              width: 900px;
+              border-width: 3px;
             }
             h1, h2{
                 color: rgb(62, 62, 77);
                 text-align: center;
-                margin: 5px;
-                margin-left: 300px;
+                margin: 6px;
+                margin-left: 10px;
                 margin-right: 10px;
                 margin-bottom: 10px;
                 margin-top: 10px;
+                width: 900px;
             }
             h3, h4 {
                 color: rgb(62, 62, 77);
                 text-align: left;
-                margin: 5px;
-                /* margin-left: 330px; */
+                margin: 10px;
                 margin-right: 10px;
                 margin-bottom: 10px;
                 margin-top: 10px;
+                width: 900px;
             }
             article {
                 color: rgb(62, 62, 77);
                 text-align: left;
-                /* margin-left: 330px; */
                 margin-right: 10px;
             }
+            ul, ol, li{
+                margin-bottom: 6px;
+            }
             .interests {
-                color: rgb(62, 62, 77);
-                background-color: chocolate;
+                color: rgb(231, 239, 235);
+                background-color: rgb(47, 71, 49);
                 position: 10px;
                 text-align: left;
-                margin-left: 10px;
-                margin-top: 10px;
-                /* margin-right: 310px; */
+                margin: 5px;
+                margin-top: 20px;
+                margin-bottom: 15px;
                 width:300px;
-                border: 2px solid #424242; /* Bordure extérieure du tableau */
-                border-collapse: collapse;
+                border: 2px solid #424242;
             }
             table {
-            width: 60%;
-            margin: 10px auto;
-            margin-left: 330px;
-            border: 2px solid #424242; /* Bordure extérieure du tableau */
-            border-collapse: collapse;
+            background-color: rgb(149, 169, 154);
+            width: 100%;
+            margin: 5px;
+            border: 2px solid #424242;
+            column-width: 33%;
             }
-            th, td {
-            border: none; /* Pas de bordure sur les cellules */
-            padding: 10px;
+            .table-aligned {
+            table-layout: fixed;
+            }
+            .table-aligned td, th {
+            border: none;
+            padding: 8px;
             text-align: left;
             }
         </style>
     </head>
     <body>
+        <fieldset>
+            <legend>Curriculum Vitae</legend>
         <h1>Barbara LEFEBVRE</h1>
-        <h2>Alternance en Contrat Pro</h2>
+        <h2>Alternance - Développeuse Fullstack</h2>
         <h3>Ancienne organisatrice de tournages, j’ai troqué les plateaux pour les lignes de code. Je cherche une alternance
             où mettre ma logique, ma rigueur et mon énergie au service de projets passionnants.
         </h3>
-        <h4>Coordonnées</h4>
-        <table>
+        <div class="interests">Coordonnées</div>
+        <table class="table-aligned" style="border-collapse: collapse">
             <thead>
               <tr>
                 <th>Adresse</th>
@@ -84,11 +98,11 @@
               </tr>
             </tbody>
           </table>
-          <h4>Compétences Techniques</h4>
-          <table>
+          <div class="interests">Compétences Techniques</div>
+          <table class="table-aligned" style="border-collapse: collapse">
               <thead>
                 <tr>
-                  <th>Domaine</th>
+                  <th>Domaines</th>
                   <th>Technologies</th>
                   <th>Niveau</th>
                 </tr>
@@ -116,7 +130,7 @@
                 </tr>
               </tbody>
             </table>
-        <h4>Expériences</h4>
+        <div class="interests">Expériences</div>
         <article>
             <ul>
                 <li><b>Développeuse Django  OOTI  nov. 2024 - avril 2025</b>
@@ -139,7 +153,7 @@
                 </li>
             </ul>
         </article>
-        <h4>Projets Informatiques</h4>
+        <div class="interests">Projets Informatiques</div>
         <article>
             <ul>
                 <li><b>Jeu Pong Application en SPA en Django/JavaScript réalisé à 5</b>
@@ -164,21 +178,21 @@
                 </li>
             </ul>
         </article>
-        <h4>Centres d'Intérêts</h4>
         <div class="interests">Centres d'Intérêts</div>
-            <ul>
+            <ol>
                 <li>Théâtre & Cinéma : une fois par semaine</li>
                 <li>Gym suédoise et Pilates “at home”, 4 séances par semaine</li>
                 <li>Pâtissière “rustique” : tartes, cookies, cakes…</li>
                 <li>CTF Hack’Her oct. 2024 - 4e place en équipe</li>
-            </ul>
+            </ol>
         </p>
-        <h4>Sites</h4>
+        <div class="interests">Sites</div>
         <p>
             <ul>
                 <li><a href= "">LinkedIn</a></li>
                 <li><a href="">Github</a></li>
             </ul>
         </p>
+        </fieldset>
     </body>
 </html>
