@@ -234,7 +234,7 @@ p[data-value]:after {
 }
 
 .css3::-moz-progress-bar,
-.php::-moz-progress-bar {
+.php::-moz-progress-bar
         {
         /* Gradient background with Stripes */
         background-image:
@@ -248,7 +248,7 @@ p[data-value]:after {
                 rgba(255, 255, 255, .25),
                 rgba(0, 0, 0, .2)),
             -moz-linear-gradient(left, #09c, #ff0);
-    }
+        }
 
     .jquery::-moz-progress-bar,
     .node-js::-moz-progress-bar {
