@@ -1,14 +1,19 @@
-<?php 
+<?php
 
-$s = file_get_contents('ex01.txt');
-$s1 = str_split($s);
-$s2 = array_map('trim', $s1);
-$i = 0;
-while ($i < count($s2)) {
-    echo $s2[$i];
-    $i++;
+$filename = "ex01.txt";
+
+if (file_exists($filename)) {
+    $contenu = file_get_contents($filename);
+    $valeurs = explode(',', $contenu);
+    foreach ($valeurs as $valeur) {
+        echo trim($valeur) . "\n";
+    }
+} else {
+    echo "No such file or directory: $filename\n";
 }
-// fputcsv($f, ",");
-// fclose($f);
-
 ?>
+
+//file_get_contents() reads the entire file into a string
+//explode() splits the string into an array using the specified delimiter (comma in this case)
+//trim() removes whitespace from the beginning and end of a string
+//foreach() iterates over each element in the array and prints it
