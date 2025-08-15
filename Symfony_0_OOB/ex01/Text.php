@@ -37,10 +37,13 @@ class Text{
             print("Error: No data to read.\n");
             return false;
         }
-        $content = '';
-        foreach ($this->_data as $str) {
-            $content .= '<p>' . htmlspecialchars($str) . '</p>';
-        }
+        $content[] = '';
+        foreach ($this->_data as $str)
+            $content[] .= "<p>" . htmlspecialchars($str) . "</p>\n";
+        $size = count($content) - 1;
+        // Remove the last empty element if it exists
+        if ($size >= 0)
+            $content[$size] = trim($content[$size]);
         return $content;
     }
 }

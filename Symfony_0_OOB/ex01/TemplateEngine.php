@@ -13,22 +13,35 @@ class   TemplateEngine{
             print("Error: fileName is not a string\n");
             return false;
         }
-        $renderData = $text->readData();
-        if ($renderData === false) {
+
+        $renderedData = $text->readData();
+
+        if ($renderedData === false) {
             print("Error: No data to render.\n");
             return false;
         }
+    
+        if (is_array($renderedData))
+            $renderedData = implode('', $renderedData);
+
         $file = fopen($fileName, 'w');
-        $content = "<!DOCTYPE html>
+        if (!$file) {
+            print("Error: Unable to open file for writing.\n");
+            return false;
+        }
+
+        $template = "<!DOCTYPE html>
         <html>
             <head>
                 <title>New Text</title>
             </head>
             <body>
                 <h1>New Text</h1>
-                {%renderData}
+                    {%renderedData}
             </body>
         </html>";
+
+        $content = str_replace("{%renderedData}", $renderedData, $template);
 
         fwrite($file, $content);
         fclose($file);
@@ -37,18 +50,3 @@ class   TemplateEngine{
 }
 
 ?>
-<!-- 
-<!DOCTYPE html>
-<html>
-	<head>
-		<title>{nom}</title>
-	</head>
-	<body>
-		<h1>{nom}</h1>
-		<p>
-			Auteur: <b>{auteur}</b><br />
-			Description: {description}<br />
-			Prix: <b>{prix} &euro;</b>
-		</p>
-	</body>
-</html> -->

@@ -15,7 +15,7 @@ $parameters = new Text($a);
 $b = "This is an additionnal text.";
 $parameters->append($b);
 $c = "another text to append";
-
+$parameters->append($c);
 $result = $file->createFile('test.html', $parameters);
 
 ?>
