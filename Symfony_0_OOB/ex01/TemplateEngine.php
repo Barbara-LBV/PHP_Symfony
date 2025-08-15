@@ -2,7 +2,7 @@
 
 class   TemplateEngine{
 
-    function createFile(string $fileName, Text $text)
+    function createFile(string $fileName, Text $text): bool
     {
         if (!$text instanceof Text) {
             print("Error: Invalid parameter: must be Text object.\n");

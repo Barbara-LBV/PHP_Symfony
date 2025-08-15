@@ -6,7 +6,7 @@ include ('./Text.php');
 $file = new TemplateEngine();
 
 $a = array(
-    "Nom du livre = Les Trois Mousquetaires", 
+    "Nom du livre = Les Misérables", 
     "auteur = Victor Hugo",
     "description = Un roman sur la vie des misérables dans la France du XIXe siècle.",
     "prix = 9.99€"

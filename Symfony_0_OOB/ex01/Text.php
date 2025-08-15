@@ -31,7 +31,7 @@ class Text{
         }
     }
 
-    public function readData()
+    public function readData(): array
     {
         if (empty($this->_data)) {
             print("Error: No data to read.\n");
