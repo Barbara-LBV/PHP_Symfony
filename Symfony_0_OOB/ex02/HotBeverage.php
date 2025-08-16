@@ -1,15 +1,29 @@
 <?php 
 
+#[Attribute(\Attribute::TARGET_CLASS)]
 class HotBeverage {
 
-    public string $_name;
-    public float $_price;
-    public string $_resistence;
+    public string $name;
+    public float $price;
+    public float $resistance;
 
-    public function __construct(string $name, float $price, string $resistence = "hot") {
-        $this->_name = $name;
-        $this->_price = $price;
-        $this->_resistence = $resistence;
+    public function __construct(string $name, float $price, string $resistance) {
+        $this->name = $name;
+        $this->price = $price;
+        $this->resistance = $resistance;
+    }
+
+    // getters
+    public function getPrice(): string {
+        return $this->price;
+    }
+
+    public function getName(): string {
+        return $this->name;
+    }
+
+    public function getResistance(): string {
+        return $this->resistance;
     }
 }
 ?>

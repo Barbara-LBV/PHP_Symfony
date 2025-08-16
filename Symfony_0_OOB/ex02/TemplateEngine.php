@@ -1,45 +1,50 @@
 <?php
 
+include './HotBeverage.php';
+
 class   TemplateEngine{
 
-    function createFile(string $fileName, array $param): bool
+    function createFile(HotBeverage $text): bool
     {
-        if (!is_array($param)) {
-            print("Error: Invalid parameter: must be an Array.\n");
+        if (!$text instanceof HotBeverage) {
+            print("Error: Invalid parameter: must be an HotBeverage object.\n");
             return false;
         }
 
-        if (!is_string($fileName)) {
-            print("Error: fileName is not a string\n");
+        $template = file_get_contents('template.html');
+        if ($template === false) {
+            fclose($file);
             return false;
         }
 
-        $file = fopen($fileName, 'w');
+        $reflectedClass = new ReflectionClass($text);
+        $attributes = $reflectedClass->getProperties();
+
+        if ($attributes === false) {
+            fclose($file);
+            print("Error: Unable to get parameters from the object.\n");
+            return false;
+        }
+
+        $file = fopen($reflectedClass->getName() . '.html', 'w');
         if (!$file) {
             print("Error: Unable to open file for writing.\n");
             return false;
         }
 
-        $template = "<!DOCTYPE html>
-        <html>
-            <head>
-                <title>{name}</title>
-            </head>
-            <body>
-                <h1>{name}</h1>
-                <p>
-                    Price: {price} &euro;<br />
-                    Sleeping resistance: {resistence}/5
-                </p>
-                <p>Description: {description}</p>
-                <p>Comment: {comment}</p>
-            </body>
-        </html>";
-
         $content = '';
-        foreach ($param as $key => $value)
-            $content = str_replace('{' . $key . '}', $value, $template);
+        $names = [];
+        $values = [];
 
+        foreach ($attributes as $attribute) {
+            $attribute->setAccessible(true);
+            $name = $attribute->getName();
+            $names[] = '{' . $name . '}';
+            $values[] = $attribute->getValue($text);
+        }
+
+        $content = str_replace($names, $values, $template);
+        
         fwrite($file, $content);
         fclose($file);
         return true;

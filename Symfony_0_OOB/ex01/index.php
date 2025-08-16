@@ -1,7 +1,7 @@
 <?php 
 
-include('./TemplateEngine.php');
-include ('./Text.php');
+include'./TemplateEngine.php';
+include './Text.php';
 
 $file = new TemplateEngine();
 
