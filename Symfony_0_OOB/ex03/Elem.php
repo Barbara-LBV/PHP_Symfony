@@ -6,11 +6,12 @@ class Elem {
     public string $element;
     public array $htmlElements = []; // array of strings
     public string $result = '';
-    public array $priorityTags = ['html', 'head', 'meta', 'title', 'body'];
     public array $tags = [
-        'html', 'head', 'meta', 'title', 'body', 'img', 'hr', 'br', 
-        'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'span', 'div'
-    ];
+        'html', 'head', 'meta', 'title', 'body', 'p', 'div', 'img', 'hr', 'br', 
+        'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span'];
+    public array $autoClosing = ['meta', 'br', 'hr', 'img'];
+    public array $priorityTags = ['html', 'head', 'meta', 'title', 'body', 'div', 'p'];
+    public array $secondaryTags = ['div', 'p'];
 
     public function __construct(string $element, string $content = '') {
         if (!in_array($element, $this->tags)) {
@@ -20,16 +21,29 @@ class Elem {
         $this->element = $element;
         $this->content = $content;
 
-        $autoClosing = ['meta', 'br', 'hr', 'img'];
         $key = array_search($this->element, $this->priorityTags);
-        if (in_array($this->element, $this->priorityTags) && in_array($this->element, $autoClosing)) {
+
+        if (in_array($this->element, $this->priorityTags) 
+            && in_array($this->element, $this->autoClosing)) {
             $this->htmlElements[$key] = "<{$this->element} {$this->content}/>";
-        } elseif (in_array($this->element, $this->priorityTags)) {
-            $this->htmlElements[$key] = "<{$this->element}>{$this->content}";
-        } else if (in_array($this->element, $autoClosing)) {
-            $this->htmlElements[5] = "<{$this->element} {$this->content}/>";
-        } else
-            $this->htmlElements[5] = "<{$this->element}>{$this->content}</{$this->element}>";
+        }
+
+        elseif($this->element == 'title')
+            $this->htmlElements[$key] = "<{$this->element}> {$this->content} </{$this->element}>";
+        
+        elseif (in_array($this->element, $this->priorityTags)){
+            if (!$this->content !== '')
+                $this->htmlElements[$key] = "<{$this->element}>{$this->content}";
+            else 
+                $this->htmlElements[$key] = "<{$this->element}>";
+        }
+
+        elseif (in_array($this->element, $this->autoClosing))
+            $this->htmlElements[6] = "<{$this->element} {$this->content} />";
+        
+        else
+            $this->htmlElements[6] = "<{$this->element}>{$this->content} </{$this->element}>";
+        
         ksort($this->htmlElements);
         }
 
@@ -59,36 +73,38 @@ class Elem {
         }
 
         // adding closing tags for priority tags
-        for ($i = 4 ; $i > -1 ; $i--) {
+        for ($i = 6 ; $i > -1 ; $i--) {
             $key = array_key_exists($i, $this->htmlElements);
-            if ($key === true && $i != 2)  {
-                $value = "</{$this->priorityTags[$i]}>";
+            $value = "</{$this->priorityTags[$i]}>";
+            if ($key === true && $i == 1)  {
+                if (in_array('<body>', $this->htmlElements)){
+                    $k = array_search('<body>', $this->htmlElements);
+                    array_splice($this->htmlElements, $k, 0, $value);
+                }
+            }
+            if ($key === true && $i != 2 && $i != 3)  {
                 if (!in_array($value, $this->htmlElements))
                     $this->htmlElements[] = $value;
             }
         }
-        
-        $this->result = formatingHTML($this->htmlElements);
+        $this->result = $this->formatingHTML($this->htmlElements);
         return $this->result;
     }
-}
 
-function formatingHTML(array $a): string {
-    $indent = 0;
-    $result = "";
+    function formatingHTML(array $a): string {
+        $indent = 0;
 
-    foreach ($a as $tag) {
-        if (preg_match('/^<\//', $tag)) {
-            $indent -= 2; //closing tag, decreasing before
+        foreach ($a as $tag) {
+            if (preg_match('/^<\//', $tag))
+                $indent -= 2; //closing tag, decreasing before
+            if ($indent < 0)
+                $indent = 0; // avoid negative indentation
+            $this->result .= str_repeat("  ", $indent) . $tag . "\n";
+            if (preg_match('/^<(?!\/)(?!.*\/>)/', $tag))
+                $indent++; // opening tag, increasing after
         }
-        if ($indent < 0)
-            $indent = 0; // avoid negative indentation
-        $result .= str_repeat("  ", $indent) . $tag . "\n";
-        if (preg_match('/^<(?!\/)(?!.*\/>)/', $tag)) {
-            $indent++; // opening tag, increasing after
-        }
+        return $this->result;
     }
-    return $result;
 }
 
 ?>
