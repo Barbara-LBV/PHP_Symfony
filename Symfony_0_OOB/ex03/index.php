@@ -10,9 +10,11 @@ echo $elem->getHTML();
 
 $file = new TemplateEngine($elem);
 $file->createFile('test');
+
 $meta = new Elem('meta', 'charset="UTF-8"');
 $elem->pushElement($meta);
 echo $elem->getHTML();
+
 $file2 = new TemplateEngine($elem);
 $file2->createFile('test2');
 ?>
