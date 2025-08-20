@@ -3,22 +3,22 @@
 #[HotBeverage]
 class Tea extends HotBeverage {
 
-    private string $description;
-    private string $comment;
+    private string $_description;
+    private string $_comment;
 
     public function __construct(string $name, float $price, float $resistance, string $description, string $comment) {
         parent::__construct($name, $price, $resistance);
-        $this->description = $description;
-        $this->comment = $comment;
+        $this->_description = $description;
+        $this->_comment = $comment;
     }
 
     // getters
     public function getDescription(): string {
-        return $this->description;
+        return $this->_description;
     }
 
     public function getComment(): string {
-        return $this->comment;
+        return $this->_comment;
     }
 }
 ?>
