@@ -21,6 +21,7 @@ $elem->pushElement($div1);
 $elem->pushElement(new Elem('title', 'Fucking PHP'));
 $elem->pushElement(new Elem('head'));
 $elem->pushElement($div2);
+$elem->pushElement(new Elem('img', 'src="image.jpg" alt="Image"'));
 echo $elem->getHTML();
 
 $file2 = new TemplateEngine($elem);
