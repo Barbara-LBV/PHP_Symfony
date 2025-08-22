@@ -4,12 +4,12 @@ include('./TemplateEngine.php');
 
 $elem = new Elem('html');
 $body = new Elem('body');
-$body->pushElement(new Elem('elementary', 'truc'));
+// $body->pushElement(new Elem('elementary', 'truc'));
 $elem->pushElement($body);
-echo $elem->getHTML();
+// echo $elem->getHTML();
 
-$file = new TemplateEngine($elem);
-$file->createFile('test');
+// $file = new TemplateEngine($elem);
+// $file->createFile('test');
 
 $meta = new Elem('meta', 'charset="UTF-8"');
 $div1 = new Elem('div', 'Machin et bidule');
@@ -21,7 +21,10 @@ $elem->pushElement($div1);
 $elem->pushElement(new Elem('title', 'Fucking PHP'));
 $elem->pushElement(new Elem('head'));
 $elem->pushElement($div2);
-$elem->pushElement(new Elem('img', 'src="image.jpg" alt="Image"'));
+$elem->pushElement(new Elem('img', '',["src"=> "image.jpg", "class" => "text-muted"]));
+// $elem->pushElement(new Elem('li', 'Ceci est une liste numerotée'));
+$elem->pushElement(new Elem('ol'));
+$elem->pushElement(new Elem('li', 'Ceci est une liste numerotée'));
 echo $elem->getHTML();
 
 $file2 = new TemplateEngine($elem);
