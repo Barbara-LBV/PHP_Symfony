@@ -23,7 +23,7 @@ class   TemplateEngine{
             return false;
         }
         
-        fwrite($file, $this->elem->result);
+        fwrite($file, $this->elem->getResult());
         fclose($file);
         return true;
     }
