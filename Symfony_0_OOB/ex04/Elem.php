@@ -1,20 +1,20 @@
 <?php 
 
-declare(strict_types=1);
+// declare(strict_types=1);
 include './MyException.php';
 
 class Elem {
 
     private string $content;
     private string $element;
-    private string $result;
+    private string $result = '';
     private array $attributes;
     private array $htmlElements = [];
 
     private array $autoClosing = ['meta', 'br', 'hr', 'img'];
     private array $priorityTags = ['html', 'head', 'meta', 'title', 'body'];
-    private array $parentTags = ['div','p', 'table', 'tr', 'ol', 'ul'];
-    private array $closingTags = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'li', 'span', 'th', 'td'];
+    private array $parentTags = ['div', 'table', 'tr', 'ol', 'ul'];
+    private array $closingTags = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'li', 'span', 'th', 'td', 'p'];
     private array $tableTags = ['tr', 'th', 'td'];
     private array $tags = ['html', 'head', 'meta', 'title', 'body', 'div','p', 'img','hr', 'br', 
     'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'table', 'tr', 'th', 'td', 'ul', 'ol', 'li'];
@@ -71,6 +71,22 @@ class Elem {
 
     public function __destruct(){}
 
+    public function getElement(): string {
+        return $this->element;
+    }
+
+    public function getContent(): string {
+        return $this->content;
+    }
+
+    public function getHtmlElements(): array {
+        return $this->htmlElements;
+    }
+
+    public function getAttributes(): array {
+        return $this->attributes;
+    }
+
     public function getResult(): string {
         return $this->result;
     }
@@ -86,110 +102,30 @@ class Elem {
             $this->htmlElements[] = "{$value}>{$this->content}";
         }
     }
-
-    // private function pushOtherTags($value, $key){
-    //     if ($this->element == 'li')
-    //         $this->isElementList($value);
-    //     elseif (in_array($this->element, $this->tableTags)){
-    //         $this->isTableElement($value);
-    //     }
-    //     elseif (in_array($this->element, $this->autoClosing)){
-    //         if (!in_array($this->element, $this->htmlElements))
-    //             $this->htmlElements[] = "{$value}>{$this->content}";
-    //         else
-    //             $this->htmlElements[] = "{$value} {$this->content}/>";
-    //     }   
-    //     elseif(in_array($this->element, $this->closingTags)){
-    //         if (!in_array($this->element, $this->htmlElements))
-    //             $this->htmlElements[$key] = "{$value}>{$this->content}</{$this->element}>";
-    //         else
-    //             $this->htmlElements[] = "{$value}>{$this->content}</{$this->element}>";
-    //     }
-    //     elseif(in_array($this->element, $this->parentTags)){
-    //         if (!in_array($this->element, $this->htmlElements))
-    //             $this->htmlElements[$key] = "{$value}>{$this->content}";
-    //         else
-    //             $this->htmlElements[] = "{$value}>{$this->content}";
-    //     }
-    // }
     
     public function initiateAttributes(array $a) : string {
         $result = "<{$this->element}";
         $keys = array_keys($a);
 
-        foreach ($a as $key => $value){
+        foreach ($a as $key => $value)
             $result .= " {$key}={$value}";
-        }
         return $result;
     }
 
-    public function isElementList(string $value){
-        try {
-            if ($this->element == 'li'){
-                if (!in_array('<ol>', $this->htmlElements) && 
-                !in_array('<ul>', $this->htmlElements)){
-                    throw new MyException("Must be preceded by 'ol' or 'ul' tag");
-                }
-            }
-            $li_keys = array_keys($this->htmlElements, '<li');
-            $ul_keys = array_keys($this->htmlElements, '<ul');
-            $ol_keys = array_keys($this->htmlElements, '<ol');
-
-            if (!empty($li_keys)){
-                $key = array_key_last($li_keys);
-                array_splice($this->htmlElements, $key + 1, 0, "{$value}>{$this->content}</{$this->element}>");
-                return ;
-            }
-            elseif (!empty($ol_keys) || !empty($ul_keys)){
-                $new_a = array_merge($ol_keys, $ul_keys);
-                $key = array_key_last($new_a);
-                array_splice($this->htmlElements, $key + 1, 0, "{$value}>{$this->content}</{$this->element}>");
-                return ;
-            }
-                
-        } catch (Exception $e) {
-            echo $e->getMessage() . "\n";
-        }
-    }
-
-    public function isTableElement(string $value){
-        try {
-            if ($this->element == ('th' || 'tr' || 'td')){
-                if (!in_array('table', $this->htmlElements)){
-                    throw new MyException("Must be preceded by 'table' tag");
-                }
-            }
-            $tr_keys = array_keys($this->htmlElements, '<tr');
-            $th_keys = array_keys($this->htmlElements, '<th');
-            $td_keys = array_keys($this->htmlElements, '<td');
-            $new_a = array_merge($tr_keys, $th_keys, $td_keys);
-
-            if (!empty($tr_keys)){
-                $key = array_key_last($tr_keys);
-                if ($this->element == ('th' || 'td'))
-                    array_splice($this->htmlElements, $key + 1, 0, "{$value}>{$this->content}</{$this->element}>");
-                elseif ($this->element == 'tr')
-                    array_splice($this->htmlElements, $key + 1, 0, "{$value}>");
-            }    
-        } catch (Exception $e) {
-            echo $e->getMessage() . "\n";
-        }
-    }
-
     public function pushElement(Elem $elem): void {
+        $toReplace = ['<', '>', '/  '];
         if ($elem->htmlElements) {
             foreach ($elem->htmlElements as $key => $value) {
-                $trim_value = trim($value, "<>");
+                $trim_value = trim(str_replace($toReplace, ' ', $value));
+                // $trim_value = trim($trim_value);
                 if (in_array($value, $this->htmlElements))
                     continue ;
                 elseif (!array_key_exists($key, $this->htmlElements)){
-                    print("Adding new tag: {$value} key {$key}\n");
                     $this->htmlElements[$key] = $value; 
                 } elseif ($value == ('<div>' || '<p>') && in_array($value, $this->htmlElements)) {
                     $this->htmlElements[] = $value;
                 } elseif(array_key_exists($key, $this->htmlElements)
                     && in_array($trim_value, $this->priorityTags)) {
-                        print("Inserting priority tag: {$value}\n");
                         array_splice($this->htmlElements, $key, 0, $value);
                  } elseif (in_array($trim_value, $this->priorityTags)
                     && !in_array($value, $this->htmlElements)) {
@@ -207,7 +143,31 @@ class Elem {
             print("Error: Pushed Element has no HTML content.\n");
             return ;
         }
+        // $this->orderTags();
         ksort($this->htmlElements);
+    }
+
+    public function orderTags(): void {
+        $tmp_array = [];
+        $k = 0;
+        foreach ($this->tags as $key => $value) {
+            if (!empty($this->htmlElements[$key]) && (strstr($this->htmlElements[$key], $value) != false)){
+               print("0- Reordering tag: {$value}\n");
+                $tmp_array[$key] = $this->htmlElements[$key];
+            }
+            else {
+                $matches = array_filter($this->htmlElements, function($item) use ($value) {
+                    return strpos($item, $value) !== false;
+                });
+
+                if (!empty($matches)) {
+                    $firstKey = array_key_first($matches);
+                    $tmp_array[$key] = $this->htmlElements[$firstKey];
+                }
+            }
+        }
+        ksort($tmp_array);
+        $this->htmlElements = $tmp_array;
     }
 
     public function getHTML(): string {      
