@@ -4,13 +4,13 @@ include './Elem.php';
 
 class   TemplateEngine{
 
-    public Elem $elem;
+    private Elem $elem;
 
     public function __construct(Elem $elem) {
         $this->elem = $elem;
     }
 
-    function createFile(string $fileName): bool
+    public function createFile(string $fileName): bool
     {
         if (!is_string($fileName)) {
             print("Invalid parameter: must be a string.\n");

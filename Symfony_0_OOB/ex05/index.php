@@ -30,6 +30,7 @@ try {
     $elem->pushElement(new Elem('tr'));
     $elem->pushElement($body);
     $elem->pushElement(new Elem('li', 'Ceci est une liste numerotée', ["class" => "text-muted"]));
+    $elem->pushElement(new Elem('li', 'This a html list'));
     echo $elem->getHTML();
 
     $file2 = new TemplateEngine($elem);

@@ -1,13 +1,12 @@
 <?php 
 
 class Elem {
-
-    public string $content;
-    public string $element;
-    public array $htmlElements = []; // array of strings
-    public array $autoClosing = ['meta', 'br', 'hr', 'img'];
-    public array $priorityTags = ['html', 'head', 'meta', 'title', 'body'];
-    public array $tags = ['html', 'head', 'meta', 'title', 'body', 'div','p', 'img',
+    private string  $content;
+    private string   $element;
+    private array   $htmlElements = []; // array of strings
+    private array   $autoClosing = ['meta', 'br', 'hr', 'img'];
+    private array   $priorityTags = ['html', 'head', 'meta', 'title', 'body'];
+    private array   $tags = ['html', 'head', 'meta', 'title', 'body', 'div','p', 'img',
         'hr', 'br', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span'];
     
     public function __construct(string $element, string $content = '') {

@@ -16,7 +16,7 @@ class Elem {
     private array   $parentTags = ['div', 'table', 'tr', 'ol', 'ul'];
     private array   $closingTags = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'li', 'span', 'th', 'td', 'p'];
     private array   $tableTags = ['tr', 'th', 'td'];
-    private array   $tags = ['html', 'head', 'meta', 'title', 'body', 'div', 'p', 'img','hr', 'br', 
+    private array   $tags = ['html', 'head', 'meta', 'title', 'body', 'div','p', 'img','hr', 'br', 
     'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'table', 'tr', 'th', 'td', 'ul', 'ol', 'li'];
     
     public function __construct(string $element, string $content = '', array $attributes = []){
@@ -92,12 +92,18 @@ class Elem {
     }
 
     public function pushElement(Elem $elem): void {
-        $toReplace = ['<', '>', '/  '];
+        $toReplace = ['<', '>', '/'];
 
         if ($elem->htmlElements) {
             foreach ($elem->htmlElements as $key => $value) {
                 $trim_value = trim(str_replace($toReplace, ' ', $value));
-                
+                // print("Pushing element: $value\n");
+                if ($this->isElementList($value, $key) === false)
+                    return ;
+                // if ($this->element == ('th' || 'tr' || 'td'))
+                //     $this->isTableElement($value);
+                // $this->isElementList($value);
+                // $this->isTableElement($value);
                 if (in_array($value, $this->htmlElements))
                     continue ;
                 elseif (!array_key_exists($key, $this->htmlElements)){
@@ -119,6 +125,8 @@ class Elem {
             print("Error: Pushed Element has no HTML content.\n");
             return ;
         }
+        // if (strstr($value,'<li') !== false)
+        //     $this->isElementList($value);
         $this->orderTags();
     }
 
@@ -237,6 +245,71 @@ class Elem {
 
         // 3) tableau séquentiel propre
         $this->htmlElements = array_values($result);
+    }
+
+    private function isElementList(string $value, int $li_key) : bool {
+        try {
+            if (strstr($value, '<li') === false)
+                return true;
+
+            elseif (strstr($value, '<li') !== false
+                && (!in_array('<ol>', $this->htmlElements) 
+                || !in_array('<ul>', $this->htmlElements))){
+                    throw new MyListException();
+                    return false;
+                }
+            
+            $li_keys = $this->getListTags($value);
+            $ul_keys = array_keys($this->htmlElements, '<ul>');
+            $ol_keys = array_keys($this->htmlElements, '<ol>');
+            $new_a = array_merge($ul_keys, $ol_keys);
+            
+            if (!empty($li_key) || $li_key !== null)
+                $l_key = array_key_last($li_keys);
+            if (!empty($ol_keys) || !empty($ul_keys))
+                $p_key = array_key_last($new_a);
+            if (isset($l_key) && isset($p_key) && $l_key < $p_key)
+                array_splice($this->htmlElements, $p_key + 1, 0, $value);
+            elseif (isset($l_key) && isset($p_key) && $l_key > $p_key)
+                array_splice($this->htmlElements, $l_key + 1, 0, $value);
+        } catch (Exception $e) {
+            echo $e->getMessage() . "\n";
+        }
+        return true;
+    }
+
+    private function getListTags(string $value) : ?array {
+        $a = [];
+        foreach ($this->htmlElements as $i => $tag) {
+            if (strstr($tag, '<li') !== false) {
+                $a[$i] = $i;
+            }
+        }
+        return $a;
+    }
+
+    private function isTableElement(string $value){
+        try {
+            if ($this->element == ('th' || 'tr' || 'td')){
+                if (!in_array('table', $this->htmlElements)){
+                    throw new MyException("Must be preceded by 'table' tag");
+                }
+            }
+            $tr_keys = array_keys($this->htmlElements, '<tr');
+            $th_keys = array_keys($this->htmlElements, '<th');
+            $td_keys = array_keys($this->htmlElements, '<td');
+            $new_a = array_merge($tr_keys, $th_keys, $td_keys);
+
+            if (!empty($tr_keys)){
+                $key = array_key_last($tr_keys);
+                if ($this->element == ('th' || 'td'))
+                    array_splice($this->htmlElements, $key + 1, 0, "{$value}>{$this->content}</{$this->element}>");
+                elseif ($this->element == 'tr')
+                    array_splice($this->htmlElements, $key + 1, 0, "{$value}>");
+            }    
+        } catch (Exception $e) {
+            echo $e->getMessage() . "\n";
+        }
     }
 }
 

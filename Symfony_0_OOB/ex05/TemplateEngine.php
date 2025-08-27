@@ -4,7 +4,7 @@ include './Elem.php';
 
 class   TemplateEngine{
 
-    private Elem $elem;
+    public Elem $elem;
 
     public function __construct(Elem $elem) {
         $this->elem = $elem;
@@ -23,7 +23,7 @@ class   TemplateEngine{
             return false;
         }
         
-        fwrite($file, $this->elem->result);
+        fwrite($file, $this->elem->getResult());
         fclose($file);
         return true;
     }
