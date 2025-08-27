@@ -26,7 +26,10 @@ try {
     $elem->pushElement(new Elem('img', '',["src"=> "image.jpg", "class" => "text-muted"]));
     $elem->pushElement(new Elem('li', 'Ceci est une liste numerotée'));
     $elem->pushElement(new Elem('ol'));
+    // $elem->pushElement(new Elem('table'));
+    $elem->pushElement(new Elem('tr'));
     $elem->pushElement(new Elem('table'));
+    // $elem->pushElement(new Elem('th'));
     $elem->pushElement(new Elem('tr'));
     $elem->pushElement($body);
     $elem->pushElement(new Elem('li', 'Ceci est une liste numerotée', ["class" => "text-muted"]));
@@ -37,5 +40,6 @@ try {
     $file2->createFile('test2');
 } catch (TypeError $e) {
     echo $e->getMessage() . "\n";
-} 
+}
+
 ?>

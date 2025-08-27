@@ -93,40 +93,40 @@ class Elem {
 
     public function pushElement(Elem $elem): void {
         $toReplace = ['<', '>', '/'];
-
-        if ($elem->htmlElements) {
-            foreach ($elem->htmlElements as $key => $value) {
-                $trim_value = trim(str_replace($toReplace, ' ', $value));
-                // print("Pushing element: $value\n");
-                if ($this->isElementList($value, $key) === false)
-                    return ;
-                // if ($this->element == ('th' || 'tr' || 'td'))
-                //     $this->isTableElement($value);
-                // $this->isElementList($value);
-                // $this->isTableElement($value);
-                if (in_array($value, $this->htmlElements))
-                    continue ;
-                elseif (!array_key_exists($key, $this->htmlElements)){
-                    $this->htmlElements[$key] = $value; 
-                } 
-                elseif ($value == ('<div>' || '<p>') && in_array($value, $this->htmlElements)) {
-                    $this->htmlElements[] = $value;
-                } 
-                elseif (array_key_exists($key, $this->htmlElements)
-                    && in_array($trim_value, $this->priorityTags)
-                    && !in_array($value, $this->htmlElements)) {
-                        array_splice($this->htmlElements, $key, 0, $value);
-                } 
-                elseif (!in_array($trim_value, $this->priorityTags))
-                    $this->htmlElements[] = $value;
+        try {
+            if ($elem->htmlElements) {
+                foreach ($elem->htmlElements as $key => $value) {
+                    $trim_value = trim(str_replace($toReplace, ' ', $value));
+                    if (in_array($value, $this->htmlElements))
+                        continue ;
+                    if ($this->checkListTags($value) === false) {
+                        continue;
+                    }
+                    if ($this->checkTableTags($value) === false) {
+                        continue;
+                    }
+                    elseif (!array_key_exists($key, $this->htmlElements)){
+                        $this->htmlElements[$key] = $value; 
+                    } 
+                    elseif ($value == ('<div>' || '<p>') && in_array($value, $this->htmlElements)) {
+                        $this->htmlElements[] = $value;                    } 
+                    elseif (array_key_exists($key, $this->htmlElements)
+                        && in_array($trim_value, $this->priorityTags)
+                        && !in_array($value, $this->htmlElements)) {
+                            array_splice($this->htmlElements, $key, 0, $value);
+                    } 
+                    elseif (!in_array($trim_value, $this->priorityTags))
+                        $this->htmlElements[] = $value;
+                }
+            } else {
+                print("Error: Pushed Element has no HTML content.\n");
+                return ;
             }
-        } 
-        else {
-            print("Error: Pushed Element has no HTML content.\n");
-            return ;
+        } catch (MyListException $e) {
+            echo $e->getMessage() . "\n";
+        } catch (MyTableException $e) {
+            echo $e->getMessage() . "\n";
         }
-        // if (strstr($value,'<li') !== false)
-        //     $this->isElementList($value);
         $this->orderTags();
     }
 
@@ -219,7 +219,32 @@ class Elem {
         return preg_match('/^<\s*([a-z][a-z0-9]*)\b/i', $tag, $matches) ? strtolower($matches[1]) : null;
     }
 
-    
+    private function checkTableTags(string $value): bool {
+        foreach ($this->tableTags as $tag) {
+            if (!empty(strstr($value, $tag)) && !in_array('<table>', $this->htmlElements)) {
+                throw new MyTableException();
+                return false;
+            }
+            if (($tag == 'th' || $tag == 'td') && !empty(strstr($value, $tag)) 
+                && in_array('<table>', $this->htmlElements)
+                && !in_array('<tr>', $this->htmlElements)) {
+                throw new MyTableException();
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private function checkListTags(string $value): bool {
+        if (strstr($value, "<li") !== false
+        && !(in_array('<ol>', $this->htmlElements))
+        && !(in_array('<ul>', $this->htmlElements))){
+            throw new MyListException();
+            return false;
+        }
+        return true;
+    }
+
     private function orderTags(): void {
         $result  = [];
         $usedIdx = [];
@@ -235,57 +260,52 @@ class Elem {
                 }
             }
         }
-
+        $key = null;
         // 2) puis toutes les autres, en gardant l’ordre d’origine, sans doublons
         foreach ($this->htmlElements as $i => $tag) {
             if (!isset($usedIdx[$i]) && !in_array($tag, $result, true)) {
                 $result[] = $tag;
             }
         }
-
+ 
         // 3) tableau séquentiel propre
         $this->htmlElements = array_values($result);
     }
 
-    private function isElementList(string $value, int $li_key) : bool {
+    private function isElementList(string $value, int $li_key) : int {
+        $v = strstr($value, '<li');
+        print("Checking if element is list item: $value\n");
         try {
-            if (strstr($value, '<li') === false)
-                return true;
+            if (empty($v))
+                return -1;
 
-            elseif (strstr($value, '<li') !== false
-                && (!in_array('<ol>', $this->htmlElements) 
-                || !in_array('<ul>', $this->htmlElements))){
+            if (!empty($v)
+                && !in_array('<ol>', $this->htmlElements) 
+                && !in_array('<ul>', $this->htmlElements)){
                     throw new MyListException();
-                    return false;
+                    return 0;
                 }
-            
+
             $li_keys = $this->getListTags($value);
             $ul_keys = array_keys($this->htmlElements, '<ul>');
             $ol_keys = array_keys($this->htmlElements, '<ol>');
-            $new_a = array_merge($ul_keys, $ol_keys);
-            
-            if (!empty($li_key) || $li_key !== null)
+
+            if (!empty($li_keys) || $li_key !== null)
                 $l_key = array_key_last($li_keys);
             if (!empty($ol_keys) || !empty($ul_keys))
-                $p_key = array_key_last($new_a);
-            if (isset($l_key) && isset($p_key) && $l_key < $p_key)
-                array_splice($this->htmlElements, $p_key + 1, 0, $value);
-            elseif (isset($l_key) && isset($p_key) && $l_key > $p_key)
-                array_splice($this->htmlElements, $l_key + 1, 0, $value);
+                $p_key = array_key_last($ol_keys) ?? array_key_last($ul_keys);
+            // print("parent key = $p_key\n");
+            // print("li key = $l_key\n");
+            if (isset($l_key) && isset($p_key) && $l_key < $p_key){
+                return $p_key + 1;
+            }
+            elseif (isset($l_key) && isset($p_key) && $l_key > $p_key){
+                return $l_key + 1;
+            }
         } catch (Exception $e) {
             echo $e->getMessage() . "\n";
         }
-        return true;
-    }
-
-    private function getListTags(string $value) : ?array {
-        $a = [];
-        foreach ($this->htmlElements as $i => $tag) {
-            if (strstr($tag, '<li') !== false) {
-                $a[$i] = $i;
-            }
-        }
-        return $a;
+        return 0;
     }
 
     private function isTableElement(string $value){
