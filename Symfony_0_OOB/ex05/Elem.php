@@ -10,6 +10,7 @@ class Elem {
     private string  $result = '';
     private array   $attributes;
     private array   $htmlElements = [];
+    private array   $Elements = [];
 
     private array   $autoClosing = ['meta', 'br', 'hr', 'img'];
     private array   $priorityTags = ['html', 'head', 'meta', 'title', 'body'];
@@ -30,7 +31,7 @@ class Elem {
 
             $key = array_search($this->element, $this->tags);
             $value = $this->initiateAttributes($this->attributes);
-  
+            $this->Elements[] = $element;
             switch ($key){
                 case 0: // html tag
                     $this->htmlElements[$key] = $value . ">";
@@ -102,12 +103,17 @@ class Elem {
                         && !in_array($trim_value, $this->parentTags))
                         continue;
                     elseif ($this->checkListTags($value) === false
-                        || $this->checkTableTags($value) === false)
+                        || $this->checkTableTags($value) === false){
+                        print("Skipping invalid tag: $value\n");
                         continue;
+                        }
                     elseif (strstr($value, '<li') !== false)
                         $this->pushListTag($value);
-                    elseif (in_array($trim_value, $this->tableTags))
+                    elseif (in_array($trim_value, $this->tableTags)){
+                        print("PUSHING TABLE TAG: $value\n");
                         $this->pushTableTag($value);
+                    }
+                        
                     elseif (!array_key_exists($key, $this->htmlElements))
                         $this->htmlElements[$key] = $value; 
                     elseif ($value == ('<div>' || '<p>') && in_array($value, $this->htmlElements)){
@@ -145,21 +151,9 @@ class Elem {
         $this->result = '';
         $openTags = [];
 
-        // Insert </head> tag before <body> if necessary
-        $headIndex = array_search('<head>', $this->htmlElements);
-        $bodyIndex = array_search('<body>', $this->htmlElements);
+        $this->insertClosingHeadTag();
+        $this->insertClosingParentTags();
 
-        // Reindex the array
-        $this->htmlElements = array_values($this->htmlElements); 
-        if ($headIndex !== false && $bodyIndex !== false && $headIndex < $bodyIndex) {
-            // check if </head> already exists
-            $closeHeadIndex = array_search('</head>', $this->htmlElements);
-            if ($closeHeadIndex === false || $closeHeadIndex > $bodyIndex) {
-                // Insert </head> just before <body>
-                array_splice($this->htmlElements, $bodyIndex, 0, ['</head>']);
-            }
-        }
-        
         $maxIndex = count($this->htmlElements);
         for ($i = -1; $i < $maxIndex; $i++) {
             // check if the index exists in htmlElements
@@ -190,6 +184,40 @@ class Elem {
             $this->result .= str_repeat('  ', count($openTags)) . "</{$tagToClose}>\n";
         }
         return $this->result;
+    }
+
+    private function insertClosingHeadTag(): void {
+        // Insert </head> tag before <body> if necessary
+        $headIndex = array_search('<head>', $this->htmlElements);
+        $bodyIndex = array_search('<body>', $this->htmlElements);
+
+        // Reindex the array
+        $this->htmlElements = array_values($this->htmlElements); 
+        if ($headIndex !== false && $bodyIndex !== false && $headIndex < $bodyIndex) {
+            // check if </head> already exists
+            $closeHeadIndex = array_search('</head>', $this->htmlElements);
+            if ($closeHeadIndex === false || $closeHeadIndex > $bodyIndex) {
+                // Insert </head> just before <body>
+                array_splice($this->htmlElements, $bodyIndex, 0, ['</head>']);
+            }
+        }
+    }
+
+    private function insertClosingParentTags(): void {
+        $flag = 0;
+        $previousTag = '';
+        $parentTags = ['div', 'table', 'tr'];
+
+        foreach ($this->htmlElements as $i => $element) {
+            $trim_element = trim(str_replace(['<', '>'], ' ', $element));
+            if (in_array($trim_element, $parentTags) && $flag === 0) {
+                $previousTag = "</{$trim_element}>";    
+                $flag = 1;
+            } elseif (in_array($trim_element, $parentTags) && $flag === 1) {
+                array_splice($this->htmlElements, $i, 0, $previousTag);
+                $flag = 0;
+            }
+        }
     }
 
     private function addOtherTags($value, $key){
@@ -278,6 +306,8 @@ class Elem {
     private function pushListTag(string $list) : void {
         $result  = [];
         $parentTags = ['ol', 'ul'];
+        
+        // get the last parent tag index
         foreach ($parentTags as $p) {
             foreach ($this->htmlElements as $i => $tag) {
                 if ($this->tagName($tag) === $p)
@@ -300,24 +330,48 @@ class Elem {
     }
 
     private function pushTableTag(string $value){
+        $parentTags = ['table', 'tr'];
+        $result  = [];
+        if (strstr($value,'th') === false
+            && strstr($value,'td') === false
+            && strstr($value,'tr') === false)
+            return ;
+
         try {
-            if ($this->element == ('th' || 'tr' || 'td')){
-                if (!in_array('table', $this->htmlElements)){
-                    throw new MyException("Must be preceded by 'table' tag");
+            if (strstr($value,'tr') !== false && !in_array('<table>', $this->htmlElements)){
+                    throw new MyTableException("Must be preceded by 'table' tag");
+                    return ;
+            }
+             foreach ($parentTags as $p) {
+                foreach ($this->htmlElements as $i => $tag) {
+                    if ($this->tagName($tag) === $p)
+                        $result[] = $i;
                 }
             }
-            $tr_keys = array_keys($this->htmlElements, '<tr');
-            $th_keys = array_keys($this->htmlElements, '<th');
-            $td_keys = array_keys($this->htmlElements, '<td');
-            $new_a = array_merge($tr_keys, $th_keys, $td_keys);
-
-            if (!empty($tr_keys)){
-                $key = array_key_last($tr_keys);
-                if ($this->element == ('th' || 'td'))
-                    array_splice($this->htmlElements, $key + 1, 0, "{$value}>{$this->content}</{$this->element}>");
-                elseif ($this->element == 'tr')
-                    array_splice($this->htmlElements, $key + 1, 0, "{$value}>");
-            }    
+            print_r($result);
+            $key = array_key_last($result);
+            print("KEY: $key\n");
+            print("VALUE: $value\n");
+            $key_value = $result[$key] ?? null;
+            print("KEY_VALUE: {$this->htmlElements[$key_value]}\n");
+            // if last index is 'tr' and $value == 'tr', do nothing
+            if ($this->tagName($this->htmlElements[$key_value]) === 'tr'
+                && strstr($value,'tr') !== false){
+                    return ;
+            }
+            $maxIndex = count($this->htmlElements);
+            print("MAXINDEX: $maxIndex\n");
+            if ($key !== null) {
+                for ($i = $key_value; $i < $maxIndex; $i++) {
+                    if (!$this->htmlElements[$i + 1]){
+                        array_push($this->htmlElements, $value);
+                        break ;
+                    }
+                    else {
+                            break ;
+                        }
+                }
+            }
         } catch (Exception $e) {
             echo $e->getMessage() . "\n";
         }
