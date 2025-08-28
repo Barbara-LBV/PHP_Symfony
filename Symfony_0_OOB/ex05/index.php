@@ -14,8 +14,8 @@ try {
     $file->createFile('test');
     print ("************************\n");
     $meta = new Elem('meta', 'charset="UTF-8"');
-    $div1 = new Elem('div', 'Machin et bidule');
-    $span = new Elem('span', 'This is sentence');
+    $div1 = new Elem('div');
+    $span = new Elem('span', 'This is span sentence');
     $div2 = new Elem('div');
     $div1->pushElement($span);
     $elem->pushElement($meta);
@@ -33,6 +33,7 @@ try {
     $elem->pushElement(new Elem('tr'));
     $elem->pushElement($body);
     $elem->pushElement(new Elem('li', 'Ceci est une liste numerotée', ["class" => "text-muted"]));
+    $elem->pushElement(new Elem('img', '',["src"=> "image_V2.jpg"]));
     $elem->pushElement(new Elem('li', 'This a html list'));
     echo $elem->getHTML();
 
