@@ -122,7 +122,7 @@ class Elem {
         $this->orderTags();
     }
 
-    public function getHTML(): string {      
+        public function getHTML(): string {      
         if (empty($this->htmlElements)) {
             print("Error: No HTML elements to render.\n");
             return '';
@@ -132,22 +132,9 @@ class Elem {
         $this->result = '';
         $openTags = [];
 
-        // Insert </head> tag before <body> if necessary
-        $headIndex = array_search('<head>', $this->htmlElements);
-        $bodyIndex = array_search('<body>', $this->htmlElements);
+        $this->insertClosingHeadTag();
+        $this->insertClosingParentTags();
 
-        // Reindex the array
-        $this->htmlElements = array_values($this->htmlElements); 
-        // print_r($this->htmlElements);
-        if ($headIndex !== false && $bodyIndex !== false && $headIndex < $bodyIndex) {
-            // check if </head> already exists
-            $closeHeadIndex = array_search('</head>', $this->htmlElements);
-            if ($closeHeadIndex === false || $closeHeadIndex > $bodyIndex) {
-                // Insert </head> just before <body>
-                array_splice($this->htmlElements, $bodyIndex, 0, ['</head>']);
-            }
-        }
-        
         $maxIndex = count($this->htmlElements);
         for ($i = -1; $i < $maxIndex; $i++) {
             // check if the index exists in htmlElements
@@ -178,6 +165,40 @@ class Elem {
             $this->result .= str_repeat('  ', count($openTags)) . "</{$tagToClose}>\n";
         }
         return $this->result;
+    }
+
+    private function insertClosingHeadTag(): void {
+        // Insert </head> tag before <body> if necessary
+        $headIndex = array_search('<head>', $this->htmlElements);
+        $bodyIndex = array_search('<body>', $this->htmlElements);
+
+        // Reindex the array
+        $this->htmlElements = array_values($this->htmlElements); 
+        if ($headIndex !== false && $bodyIndex !== false && $headIndex < $bodyIndex) {
+            // check if </head> already exists
+            $closeHeadIndex = array_search('</head>', $this->htmlElements);
+            if ($closeHeadIndex === false || $closeHeadIndex > $bodyIndex) {
+                // Insert </head> just before <body>
+                array_splice($this->htmlElements, $bodyIndex, 0, ['</head>']);
+            }
+        }
+    }
+
+    private function insertClosingParentTags(): void {
+        $flag = 0;
+        $previousTag = '';
+        $parentTags = ['div', 'table', 'tr'];
+
+        foreach ($this->htmlElements as $i => $element) {
+            $trim_element = trim(str_replace(['<', '>'], ' ', $element));
+            if (in_array($trim_element, $parentTags) && $flag === 0) {
+                $previousTag = "</{$trim_element}>";    
+                $flag = 1;
+            } elseif (in_array($trim_element, $parentTags) && $flag === 1) {
+                array_splice($this->htmlElements, $i, 0, $previousTag);
+                $flag = 0;
+            }
+        }
     }
 
     private function addOtherTags($value, $key){

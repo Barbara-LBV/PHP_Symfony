@@ -2,7 +2,7 @@
 
 class Elem {
     private string  $content;
-    private string   $element;
+    private string  $element;
     private array   $htmlElements = []; // array of strings
     private array   $autoClosing = ['meta', 'br', 'hr', 'img'];
     private array   $priorityTags = ['html', 'head', 'meta', 'title', 'body'];
@@ -66,7 +66,8 @@ class Elem {
             foreach ($elem->htmlElements as $key => $value) {
                 if (!array_key_exists($key, $this->htmlElements))
                     $this->htmlElements[$key] = $value;
-                elseif ($value == ('<div>' || '<p>') && in_array($value, $this->htmlElements)) {
+                elseif ((strstr($value, '<div>') || strstr($value, '<p>')) 
+                    && in_array($value, $this->htmlElements)) {
                     $this->htmlElements[] = $value;
                 } elseif (in_array($value, $this->htmlElements))
                     continue ;
@@ -80,28 +81,40 @@ class Elem {
         ksort($this->htmlElements);
     }
 
-    public function getHTML(): string {
-        $this->result = '';
-        $openTags = [];
-        // reset indexes of htmlElements to ensure no duplicates
+            public function getHTML(): string {      
         if (empty($this->htmlElements)) {
             print("Error: No HTML elements to render.\n");
             return '';
         }
-        $this->htmlElements = array_values($this->htmlElements);
+
+        // Reset result and openTags for each call
+        $this->result = '';
+        $openTags = [];
+
+        $this->insertClosingHeadTag();
+        $this->insertClosingParentTags();
+
         $maxIndex = count($this->htmlElements);
-        
-        for ($i = 0; $i < $maxIndex ; $i++) {
+        for ($i = -1; $i < $maxIndex; $i++) {
             // check if the index exists in htmlElements
             if (array_key_exists($i, $this->htmlElements)) {
                 $element = $this->htmlElements[$i];
-                // if opening tag, add it to openTags
-                if (preg_match('/<([a-zA-Z0-9]+)(?:\s[^>]*)?>$/', $element, $matches)) {
-                    $tagName = $matches[1];
-                    if (!in_array($tagName, $this->autoClosing)) {
-                        array_push($openTags, $tagName);
+                // Gestion des balises ouvrantes (sauf pour les balises fermantes et auto-fermantes)
+                if (!preg_match('/^<\//', $element)) { // Si ce n'est pas une balise fermante
+                    if (preg_match('/<([a-zA-Z0-9]+)(?:\s[^>]*)?>$/', $element, $matches)) {
+                        $tagName = $matches[1];
+                        if (!in_array($tagName, $this->autoClosing))
+                            array_push($openTags, $tagName);
                     }
-                }
+                } else {
+                    // Si c'est une balise fermante, la retirer de openTags
+                    if (preg_match('/<\/([a-zA-Z0-9]+)>$/', $element, $matches)) {
+                        $tagName = $matches[1];
+                        $key = array_search($tagName, $openTags);
+                        if ($key !== false)
+                            array_splice($openTags, $key, 1);
+                    }
+                } 
                 $this->result .= $this->indentElement($element, count($openTags) - 1);
             }
         }
@@ -112,12 +125,45 @@ class Elem {
         }
         return $this->result;
     }
+
+    private function insertClosingHeadTag(): void {
+        // Insert </head> tag before <body> if necessary
+        $headIndex = array_search('<head>', $this->htmlElements);
+        $bodyIndex = array_search('<body>', $this->htmlElements);
+
+        // Reindex the array
+        $this->htmlElements = array_values($this->htmlElements); 
+        if ($headIndex !== false && $bodyIndex !== false && $headIndex < $bodyIndex) {
+            // check if </head> already exists
+            $closeHeadIndex = array_search('</head>', $this->htmlElements);
+            if ($closeHeadIndex === false || $closeHeadIndex > $bodyIndex) {
+                // Insert </head> just before <body>
+                array_splice($this->htmlElements, $bodyIndex, 0, ['</head>']);
+            }
+        }
+    }
+
+    private function insertClosingParentTags(): void {
+        $flag = 0;
+        $previousTag = '';
+        $parentTags = ['div', 'table', 'tr'];
+
+        foreach ($this->htmlElements as $i => $element) {
+            $trim_element = trim(str_replace(['<', '>'], ' ', $element));
+            if (in_array($trim_element, $parentTags) && $flag === 0) {
+                $previousTag = "</{$trim_element}>";    
+                $flag = 1;
+            } elseif (in_array($trim_element, $parentTags) && $flag === 1) {
+                array_splice($this->htmlElements, $i, 0, $previousTag);
+                $flag = 0;
+            }
+        }
+    }
     
     private function indentElement(string $element, int $level): string {
         $indent = str_repeat('  ', $level);
         return $indent . $element . "\n";
     }
-
 }
 
 ?>
