@@ -10,7 +10,7 @@ class Elem {
     private string  $result = '';
     private array   $attributes;
     private array   $htmlElements = [];
-    private array   $Elements = [];
+    private int     $tableFlag = 0;
 
     private array   $autoClosing = ['meta', 'br', 'hr', 'img'];
     private array   $priorityTags = ['html', 'head', 'meta', 'title', 'body'];
@@ -93,25 +93,22 @@ class Elem {
     }
 
     public function pushElement(Elem $elem): void {
-        $toReplace = ['<', '>', '/'];
         try {
             if ($elem->htmlElements) {
                 foreach ($elem->htmlElements as $key => $value) {
-                    $trim_value = trim(str_replace($toReplace, ' ', $value));
-                    // print(" trim_value: $trim_value\n");
                     if (in_array($value, $this->htmlElements) 
-                        && !in_array($trim_value, $this->parentTags))
+                        && !in_array($elem->element, $this->parentTags))
                         continue;
                     elseif ($this->checkListTags($value) === false
                         || $this->checkTableTags($value) === false){
-                        print("Skipping invalid tag: $value\n");
+                        // print("Skipping invalid tag: $value\n");
                         continue;
                         }
                     elseif (strstr($value, '<li') !== false)
                         $this->pushListTag($value);
-                    elseif (in_array($trim_value, $this->tableTags)){
-                        print("PUSHING TABLE TAG: $value\n");
-                        $this->pushTableTag($value);
+                    elseif (in_array($elem->element, $this->tableTags)){
+                        // print("PUSHING TABLE TAG: $value\n");
+                        $this->pushTableTag($value, $elem->element);
                     }
                         
                     elseif (!array_key_exists($key, $this->htmlElements))
@@ -121,11 +118,13 @@ class Elem {
                         // print("ICIIIII {$value}\n");
                     } 
                     elseif (array_key_exists($key, $this->htmlElements)
-                        && in_array($trim_value, $this->priorityTags)
+                        && in_array($elem->element, $this->priorityTags)
                         && !in_array($value, $this->htmlElements))
                             array_splice($this->htmlElements, $key, 0, $value);
-                    elseif (!in_array($trim_value, $this->priorityTags)){
+                    elseif (!in_array($elem->element, $this->priorityTags)){
                         $this->htmlElements[] = $value;
+                        if ($elem->element == 'table')
+                             $this->tableFlag++;
                         // print("LAAA {$value}\n");
                     }
                 }
@@ -208,14 +207,17 @@ class Elem {
         $previousTag = '';
         $parentTags = ['div', 'table', 'tr'];
 
-        foreach ($this->htmlElements as $i => $element) {
-            $trim_element = trim(str_replace(['<', '>'], ' ', $element));
-            if (in_array($trim_element, $parentTags) && $flag === 0) {
-                $previousTag = "</{$trim_element}>";    
-                $flag = 1;
-            } elseif (in_array($trim_element, $parentTags) && $flag === 1) {
-                array_splice($this->htmlElements, $i, 0, $previousTag);
-                $flag = 0;
+        foreach ($parentTags as $p) {
+            foreach ($this->htmlElements as $i => $tag) {
+                if ($this->tagName($tag) === $p && $flag === 0){
+                    $previousTag = "</{$p}>";
+                    $flag = 1;
+                }
+                elseif ($this->tagName($tag) === $p && $flag === 1){
+                    array_splice($this->htmlElements, $i, 0, $previousTag);
+                    $previousTag = "";
+                    $flag = 0;
+                }
             }
         }
     }
@@ -230,6 +232,8 @@ class Elem {
         elseif(in_array($this->element, $this->parentTags)){
             $this->htmlElements[] = "{$value}>{$this->content}";
         }
+        if (strstr($value, '<table') !== false)
+            $this->tableFlag++;
     }
     
     private function initiateAttributes(array $a) : string {
@@ -329,49 +333,50 @@ class Elem {
         }
     }
 
-    private function pushTableTag(string $value){
+    private function pushTableTag(string $value, string $element) : void {
         $parentTags = ['table', 'tr'];
         $result  = [];
-        if (strstr($value,'th') === false
-            && strstr($value,'td') === false
-            && strstr($value,'tr') === false)
+        $index = [];
+        if (!in_array($element, $this->tableTags)){
+            print("Error: Invalid table tag: $element\n");
             return ;
-
+        }
         try {
-            if (strstr($value,'tr') !== false && !in_array('<table>', $this->htmlElements)){
+            if ($element === 'tr' && $this->tableFlag === 0) {
                     throw new MyTableException("Must be preceded by 'table' tag");
                     return ;
             }
-             foreach ($parentTags as $p) {
+            foreach ($parentTags as $p) {
                 foreach ($this->htmlElements as $i => $tag) {
-                    if ($this->tagName($tag) === $p)
+                    if ($this->tagName($tag) === $p){
                         $result[] = $i;
+                        $index[$i] = $tag;
+                    }
                 }
             }
-            print_r($result);
+
             $key = array_key_last($result);
-            print("KEY: $key\n");
-            print("VALUE: $value\n");
             $key_value = $result[$key] ?? null;
-            print("KEY_VALUE: {$this->htmlElements[$key_value]}\n");
-            // if last index is 'tr' and $value == 'tr', do nothing
             if ($this->tagName($this->htmlElements[$key_value]) === 'tr'
-                && strstr($value,'tr') !== false){
+                && $element == 'tr'){
+                    print("Error: Cannot add 'tr' inside another 'tr'\n");
                     return ;
             }
+
             $maxIndex = count($this->htmlElements);
-            print("MAXINDEX: $maxIndex\n");
             if ($key !== null) {
-                for ($i = $key_value; $i < $maxIndex; $i++) {
-                    if (!$this->htmlElements[$i + 1]){
-                        array_push($this->htmlElements, $value);
-                        break ;
-                    }
-                    else {
-                            break ;
-                        }
+            for ($i = $key_value; $i < $maxIndex; $i++) {
+                if ($i + 1 === $maxIndex) {
+                    $this->htmlElements[] = $value;
+                    break ;
+                }
+                elseif (strstr($this->htmlElements[$i + 1], '<th') === false
+                && strstr($this->htmlElements[$i + 1], '<td') === false) {
+                    array_splice($this->htmlElements, $i + 1, 0, $value);
+                    break ;
                 }
             }
+        }
         } catch (Exception $e) {
             echo $e->getMessage() . "\n";
         }
