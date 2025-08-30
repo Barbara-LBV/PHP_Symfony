@@ -1,6 +1,6 @@
 <?php 
 
-function getValues($str) {
+function getValues(string $str) : array {
     
     $handle = fopen($str, "r");
     $elements = [];
@@ -11,7 +11,6 @@ function getValues($str) {
 
             // Le premier élément contient name=xxx
             $first = explode("=", array_shift($list));
-            print_r($first);
             $name = trim($first[0]);
             $values = [];
 
@@ -33,17 +32,82 @@ function getValues($str) {
             if (count($firstSplit) === 2) {
                 $values[trim($firstSplit[0])] = trim($firstSplit[1]);
             }
-
+            $values['place'] = 0;
             $elements[] = array_merge(['name' => $name], $values);
         }
         fclose($handle);
     } else {
         echo "Error opening the file.";
     }
-    print_r($elements);
-
+    return $elements;
 }
 
-getValues("ex06.txt");
+function addData(array $elements, string $key, string $value) : array {
+    foreach ($elements as &$element) {
+        $element[$key] = $value;
+    }
+}
+
+function pushElement(array $elements) : array {
+    $i = 0;
+
+    while ($i < count($elements)) {
+        $element = $elements[$i];
+        while ($i + 1 < $element['position'])
+        {
+            array_splice($elements, $i + 1, 0, [[
+                'name' => '',
+                'number' => '',
+                'small' => '',
+                'molar' => '',
+                'electron' => '',
+                'position' => $i + 1,
+                'place' => $i + 1,
+                ]]);
+            $i++;
+        }
+        $elements[$i]['place'] = $i + 1;
+        $i++;
+
+    if ($element['number'] < 120)
+            $element['place'] = $i + 1;
+    }
+    return $elements;
+}
+
+
+function generateHtmlFile(array $elements, string $filename) : void {
+    $html = "<!DOCTYPE html>\n<html>\n<head>\n<title>Elements</title>\n</head>\n<body>\n";
+    $html .= "<table border-style='double' rules='all'>\n";
+
+    foreach ($elements as $element) {
+        $html .= "<tr>";
+        $html .= "<td style='border: 1px solid border; padding: 10  px'>";
+        $html .= "<h4>" . htmlspecialchars($element['name']) . "</h4>";
+        $html .= "<ul>";
+        $html .= "<li>No " . htmlspecialchars($element['number']) . "</li>";
+        $html .= "<li>" . htmlspecialchars($element['small']) . "</li>";
+        $html .= "<li>" . htmlspecialchars($element['molar']) . "</li>";
+        $html .= "<li>" . htmlspecialchars($element['electron']) . "electron</li>";
+        $html .= "</ul>";
+        $html .= "<td>";
+        $html .= "</tr>\n";
+    }
+
+    $html .= "</table>\n</body>\n</html>";
+    // $file = fopen($fileName, 'w');
+    //     if (!$file) {
+    //         print("Error: Unable to open file for writing.\n");
+    //         return ;
+    //     }
+    file_put_contents($filename, $html);
+    // fwrite($file, $html);
+    // fclose($file);
+}
+
+$elements = getValues("ex06.txt");
+$elements = pushElement($elements);
+print_r($elements);
+generateHtmlFile($elements, "mendeleiev.html");
 echo "done";
 ?>
