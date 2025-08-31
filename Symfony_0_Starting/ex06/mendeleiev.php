@@ -47,7 +47,7 @@ function pushElement(array $elements) : array {
 
     while ($i < count($elements)) {
         $element = $elements[$i];
-        while (($i + 1) % 18 < $element['position'])
+        while ($i % 18 < $element['position'])
         {
             array_splice($elements, $i, 0, [[
                 'name' => '',
@@ -68,9 +68,59 @@ function pushElement(array $elements) : array {
 
 
 function generateHtmlFile(array $elements, string $filename) : void {
-    $html = "<!DOCTYPE html>\n<html>\n<head>\n<title>Elements</title>\n</head>\n<body>\n";
-    $html .= "<table border-style='double' rules='all'>\n";
-    $cols = 18; // nombre de colonnes par ligne
+    $html = "<!DOCTYPE html>\n<html>\n<head>\n<title>Elements</title>\n";
+    $html .= "<style>\nbody {
+    background-color: #fff;
+    font-family: Trebuchet, sans-serif;
+    margin: 0;
+    padding: 10px;
+}
+
+h4 {
+    color: #3e3e4d;
+    text-align: center;
+    margin: 1px 0;
+    font-size: 12px;
+}
+
+ul {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    font-size: 10px;
+    text-align: center;
+}
+
+table {
+    border-collapse: collapse;   /* permet les doubles bordures */
+    border-spacing: 0;           /* pas d’espacement supplémentaire */
+    width: 100%;
+    table-layout: fixed;         /* force largeur égale */
+    border: 4px double #333;     /* double bordure autour du tableau */
+}
+
+td {
+    width: calc(100% / 18);      /* 18 colonnes max */
+    height: 80px;                /* ajuste la hauteur */
+    border: 2px double #424242;  /* double bordure entre cellules */
+    text-align: center;
+    vertical-align: top;
+    background: linear-gradient(145deg, #d6e2d9, #95a99a); /* effet léger */
+    padding: 4px;
+    box-sizing: border-box;
+    border-collapse: separate; 
+}
+
+td:hover {
+    background: #c7d5cc;         /* survol plus clair */
+    cursor: pointer;
+}
+\n</style>\n";
+    $html .= "</head>\n<body>\n";
+    $html .= "<div class='tablecontainer'>";
+    $html .= "<table>\n";
+    
+    $cols = 18;
     $count = count($elements);
 
     for ($i = 0; $i < $count; $i += $cols) {
@@ -79,30 +129,23 @@ function generateHtmlFile(array $elements, string $filename) : void {
             $index = $i + $j;
             if ($index < $count) {
                 $element = $elements[$index];
-                // print_r($element);
-                print("index: {$index} ");
                 if (strlen($element['name']) != 0){
-                    print("HERE\n");
-                    $html .= "<td style='border: 1px solid border; padding: 10  px'>";
+                    $html .= "<td text-align='center' style='border: 1px solid border; padding: 10  px'>";
                     $html .= "<h4>" . htmlspecialchars($element['name']) . "</h4>";
                     $html .= "<ul>";
                     $html .= "<li>No " . htmlspecialchars($element['number']) . "</li>";
                     $html .= "<li>" . htmlspecialchars($element['small']) . "</li>";
                     $html .= "<li>" . htmlspecialchars($element['molar']) . "</li>";
-                    $html .= "<li>" . htmlspecialchars($element['electron']) . " electron</li>";
+                    $html .= "<li>electrons :</li>";
+                    $html .= "<li>" . htmlspecialchars($element['electron']) . "</li>";
                     $html .= "</ul>";
                     $html .= "</td>";
-                    $i++;
-                    $j++;
                 } else {
-                    print("ICI\n");
                     $html .= "<td></td>";
                 }
             }
-            
         }
-        $html .= "</tr>\n";
-        
+        $html .= "</tr>\n"; 
     }
     $html .= "</table>\n</body>\n</html>";
     file_put_contents($filename, $html);
@@ -110,7 +153,6 @@ function generateHtmlFile(array $elements, string $filename) : void {
 
 $elements = getValues("ex06.txt");
 $elements = pushElement($elements);
-print_r($elements);
 generateHtmlFile($elements, "mendeleiev.html");
-echo "done";
+echo "HTML file generated!";
 ?>
