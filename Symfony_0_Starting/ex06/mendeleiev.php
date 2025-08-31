@@ -42,35 +42,26 @@ function getValues(string $str) : array {
     return $elements;
 }
 
-function addData(array $elements, string $key, string $value) : array {
-    foreach ($elements as &$element) {
-        $element[$key] = $value;
-    }
-}
-
 function pushElement(array $elements) : array {
     $i = 0;
 
     while ($i < count($elements)) {
         $element = $elements[$i];
-        while ($i + 1 < $element['position'])
+        while (($i + 1) % 18 < $element['position'])
         {
-            array_splice($elements, $i + 1, 0, [[
+            array_splice($elements, $i, 0, [[
                 'name' => '',
                 'number' => '',
                 'small' => '',
                 'molar' => '',
                 'electron' => '',
-                'position' => $i + 1,
-                'place' => $i + 1,
+                'position' => $i,
+                'place' => $i,
                 ]]);
             $i++;
         }
-        $elements[$i]['place'] = $i + 1;
+        $elements[$i]['place'] = $i;
         $i++;
-
-    if ($element['number'] < 120)
-            $element['place'] = $i + 1;
     }
     return $elements;
 }
@@ -79,30 +70,42 @@ function pushElement(array $elements) : array {
 function generateHtmlFile(array $elements, string $filename) : void {
     $html = "<!DOCTYPE html>\n<html>\n<head>\n<title>Elements</title>\n</head>\n<body>\n";
     $html .= "<table border-style='double' rules='all'>\n";
+    $cols = 18; // nombre de colonnes par ligne
+    $count = count($elements);
 
-    foreach ($elements as $element) {
+    for ($i = 0; $i < $count; $i += $cols) {
         $html .= "<tr>";
-        $html .= "<td style='border: 1px solid border; padding: 10  px'>";
-        $html .= "<h4>" . htmlspecialchars($element['name']) . "</h4>";
-        $html .= "<ul>";
-        $html .= "<li>No " . htmlspecialchars($element['number']) . "</li>";
-        $html .= "<li>" . htmlspecialchars($element['small']) . "</li>";
-        $html .= "<li>" . htmlspecialchars($element['molar']) . "</li>";
-        $html .= "<li>" . htmlspecialchars($element['electron']) . "electron</li>";
-        $html .= "</ul>";
-        $html .= "<td>";
+        for ($j = 0; $j < $cols; $j++) {
+            $index = $i + $j;
+            if ($index < $count) {
+                $element = $elements[$index];
+                // print_r($element);
+                print("index: {$index} ");
+                if (strlen($element['name']) != 0){
+                    print("HERE\n");
+                    $html .= "<td style='border: 1px solid border; padding: 10  px'>";
+                    $html .= "<h4>" . htmlspecialchars($element['name']) . "</h4>";
+                    $html .= "<ul>";
+                    $html .= "<li>No " . htmlspecialchars($element['number']) . "</li>";
+                    $html .= "<li>" . htmlspecialchars($element['small']) . "</li>";
+                    $html .= "<li>" . htmlspecialchars($element['molar']) . "</li>";
+                    $html .= "<li>" . htmlspecialchars($element['electron']) . " electron</li>";
+                    $html .= "</ul>";
+                    $html .= "</td>";
+                    $i++;
+                    $j++;
+                } else {
+                    print("ICI\n");
+                    $html .= "<td></td>";
+                }
+            }
+            
+        }
         $html .= "</tr>\n";
+        
     }
-
     $html .= "</table>\n</body>\n</html>";
-    // $file = fopen($fileName, 'w');
-    //     if (!$file) {
-    //         print("Error: Unable to open file for writing.\n");
-    //         return ;
-    //     }
     file_put_contents($filename, $html);
-    // fwrite($file, $html);
-    // fclose($file);
 }
 
 $elements = getValues("ex06.txt");
