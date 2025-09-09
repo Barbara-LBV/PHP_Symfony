@@ -11,7 +11,7 @@
               margin: 6;
             }
             fieldset {
-              background-color: #bed2ca;
+              background-color: #c1cfc9;
               font-family: Trebuchet, sans-serif;
               text-align: left;
               margin:6;
@@ -50,21 +50,22 @@
                 float: left;
             }
             .interests {
-                color: rgb(231, 239, 235);
-                background-color: rgb(47, 71, 49);
+                color: #c6d4c7;
+                background-color: #5e6b5f;
                 position: 10px;
                 text-align: left;
                 margin: 5px;
                 margin-top: 20px;
                 margin-bottom: 15px;
                 width:300px;
-                border: 2px solid #424242;
+                border: 2px solid #2a482c;
             }
             table {
-            background-color: rgb(149, 169, 154);
+            background-color: rgb(161, 179, 166);
             width: 100%;
             margin: 5px;
-            border: 2px solid #424242;
+            border: 2px solid;
+            border-collapse: collapse;
             column-width: 17%;
             }
             .table-aligned {
@@ -74,6 +75,10 @@
             border: none;
             padding: 8px;
             text-align: left;
+            /* border: 2px solid; */
+            }
+            .table-aligned tr:last-child td:last-child {
+            border: 2px solid #424242;
             }
         </style>
     </head>
@@ -86,7 +91,7 @@
             où mettre ma logique, ma rigueur et mon énergie au service de projets passionnants.
         </h3>
         <div class="interests">Coordonnées</div>
-        <table class="table-aligned" style="border-collapse: collapse">
+        <table class="table-aligned" style="border-color: #787171">
             <thead>
               <tr>
                 <th>Adresse</th>
@@ -103,7 +108,7 @@
             </tbody>
           </table>
           <div class="interests">Compétences Techniques</div>
-          <table class="table-aligned" style="border-collapse: collapse">
+          <table class="table-aligned" style="border-color: #787171">
               <thead>
                 <tr>
                   <th>Domaines</th>
@@ -130,21 +135,23 @@
                 <tr>
                   <td>Outils</td>
                   <td>Git, Docker</td>
-                  <td>Débutant</td>
+                  <td style="border: 2px solid #424242;">Débutant</td>
                 </tr>
               </tbody>
             </table>
         <div class="interests">Expériences</div>
         <article>
             <ul>
-                <li><b>Développeuse Django  OOTI  nov. 2024 - avril 2025</b>
+                <li>
+                    <b>Développeuse Django  OOTI  nov. 2024 - avril 2025</b>
                     <ul>
                         <li>Correction de bugs avec implémentation de tests unitaires assurant une couverture de test de 80 à 100%.</li>
                         <li>Optimisation de l'API en supprimant des urls obsolètes afin d’améliorer la fiabilité de l’application.</li>
                         <li>Modernisation & Refactoring du code existant préparant le produit aux évolutions et améliorant sa qualité globale.</li>
                     </ul>
                 </li>
-                <li><b>Chargée de Production  HL Production “La Maison France 5”    Juillet 2014 - Décembre 2021</b>
+                <li>
+                    <b>Chargée de Production  HL Production “La Maison France 5”    Juillet 2014 - Décembre 2021</b>
                     <ul>
                         <li>Organisation de tournages Plateaux/Rubriques France & étranger - 40 docs / an</li>
                         <li>Tenue et mise à jour des Plannings de Production et de Postproduction</li>
@@ -191,16 +198,12 @@
             </ol>
         </p>
         <div class="interests">Sites</div>
-        <p>
+        <div class="bis">
             <ul>
-                <div class="bis">
                     <li><a href= "https://www.linkedin.com/in/barbara-lbv/">LinkedIn</a></li>
-                </div>
-                <div class="bis">
                     <li><a href="https://github.com/Barbara-LBV">Github</a></li>
-                </div>
             </ul>
-        </p>
+        </div>
         </fieldset>
     </body>
 </html>
