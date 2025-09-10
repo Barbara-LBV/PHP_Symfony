@@ -46,50 +46,49 @@
     <body>
         <h1>My Student Form</h1>
         
-        <p>
-            <form>
-                <fieldset>
-                    <div class="form-group">
-                        <label for="Firstname">Firstname</label>
-                        <input type="text" id="firstname" name="firstname">
-                    </div>
-                    <div class="form-group">
-                        <label for="Firstname">Name</label>
-                        <input type="text" id="name" name="name">
-                    </div>
-                    <div class="form-group">
-                        <label for="Firstname">Age</label>
-                        <input type="number" id="age" name="age">
-                    </div>
-                    <div class="form-group">
-                        <label for="Phone">Phone</label>
-                        <input type="number" id="phone" name="phone">
-                    </div>
-                    <div class="form-group">
-                        <label for="Email">Email</label>
-                        <input type="email" id="email" name="email">
-                    </div>
-                    <div class="form-group">
-                        <label for="student">Student at 42?</label>
-                        <input type="checkbox" id="student" name="student">
-                    </div>
-                    <div>
-                        <input type="radio" id="gender_male" name="gender_malegender" value="male"/>
-                        <label for="gender_male">Male</label>
+        <form>
+            <fieldset>
+                <div class="form-group">
+                    <label for="firstname">Firstname</label>
+                    <input type="text" id="firstname" name="firstname">
+                </div>
+                <div class="form-group">
+                    <label for="name">Name</label>
+                    <input type="text" id="name" name="name">
+                </div>
+                <div class="form-group">
+                    <label for="firstname">Age</label>
+                    <input type="number" id="age" name="age">
+                </div>
+                <div class="form-group">
+                    <label for="phone">Phone</label>
+                    <input type="tel" id="phone" name="phone">
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" required id="email" name="email">
+                </div>
+                <div class="form-group">
+                    <label for="student">Student at 42?</label>
+                    <input type="checkbox" id="student" name="student">
+                </div>
+                <div>
+                    <input type="radio" id="gender_male" name="gender" value="male"/>
+                    <label for="gender_male">Male</label>
+                    
+                    <input type="radio" id="gender_female" name="gender" value="female"/>
+                    <label for="gender_female">Female</label>
 
-                        <input type="radio" id="gender_female" name="gender_female" value="female"/>
-                        <label for="gender_female">Female</label>
+                    <input type="radio" id="gender_other" name="gender" value="other"/>
+                    <label for="gender_other">Other</label>
+                </div>
 
-                        <input type="radio" id="gender_other" name="gender_other" value="other"/>
-                        <label for="gender_other">Other</label>
-                    </div>
+                <div>
+                       <button type="submit" onclick="displayFormContents()">Run the sexy JS!</button>
+                </div>
+            </fieldset>    
+        </form>
 
-                    <div>
-                        <button type="button" onclick="displayFormContents()">Run the sexy JS!</button>
-                    </div>
-                </fieldset>    
-            </form>
-        </p>
         <script src="popup.js"></script>
     </body>
 </html>
