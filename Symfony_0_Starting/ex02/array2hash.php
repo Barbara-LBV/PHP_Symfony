@@ -1,6 +1,8 @@
 <?php 
 
-function array2hash($array){
+function array2hash($array) : array {
+    if ($array === null || count($array) == 0)
+        return [];
     $hash = array();
     foreach ($array as $item) {
         if (count($item) == 2) {

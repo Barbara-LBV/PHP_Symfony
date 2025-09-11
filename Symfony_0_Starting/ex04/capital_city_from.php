@@ -1,6 +1,6 @@
 <?php
 
-function capital_city_from($state) {
+function capital_city_from($state) : string {
     $states = [
             'Oregon' => 'OR',
             'Alabama' => 'AL',
@@ -20,7 +20,7 @@ function capital_city_from($state) {
             return $capitals[$abbreviation] . "\n";
         }
     } else {
-        return "Unknown state: $state\n";
+        return "Unknown state: {$state}\n";
     }
 }
 

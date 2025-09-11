@@ -101,14 +101,20 @@ table {
 
 td {
     width: calc(100% / 18);      /* 18 colonnes max */
-    height: 80px;                /* ajuste la hauteur */
+    height: 100px;                /* ajuste la hauteur */
     border: 2px double #424242;  /* double bordure entre cellules */
     text-align: center;
     vertical-align: top;
     background: linear-gradient(145deg, #d6e2d9, #95a99a); /* effet léger */
-    padding: 4px;
+    padding: 10px;
     box-sizing: border-box;
     border-collapse: separate; 
+}
+
+legend {
+    text-align: center;
+    padding: 50px;
+    color: #2a4233ff;
 }
 
 td:hover {
@@ -117,7 +123,8 @@ td:hover {
 }
 \n</style>\n";
     $html .= "</head>\n<body>\n";
-    $html .= "<div class='tablecontainer'>";
+    $html .= "<legend class='legend'>Mendeleiv Elements Table</legend>";
+    $html .= "<div>";
     $html .= "<table>\n";
     
     $cols = 18;
@@ -130,7 +137,7 @@ td:hover {
             if ($index < $count) {
                 $element = $elements[$index];
                 if (strlen($element['name']) != 0){
-                    $html .= "<td text-align='center' style='border: 1px solid border; padding: 10  px'>";
+                    $html .= "<td>";
                     $html .= "<h4>" . htmlspecialchars($element['name']) . "</h4>";
                     $html .= "<ul>";
                     $html .= "<li>No " . htmlspecialchars($element['number']) . "</li>";
