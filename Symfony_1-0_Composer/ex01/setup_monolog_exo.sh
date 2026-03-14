@@ -1,9 +1,5 @@
 #!/bin/bash
 
-# Crée un répertoire principal
-mkdir -p exo_monolog
-cd exo_monolog || exit
-
 # Task 1 : version exacte 2.3.0
 mkdir -p task1
 cat > task1/composer.json <<'EOF'
