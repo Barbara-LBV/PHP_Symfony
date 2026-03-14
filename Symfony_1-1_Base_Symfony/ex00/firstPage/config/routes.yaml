@@ -9,3 +9,9 @@
 
 controllers:
     resource: routing.controllers
+
+# The "first_page" route is defined in the src/Controller/FirstPageController.php file
+
+first_page:
+    path: e00/firstPage
+    controller: App\Controller\FirstPageController::show
