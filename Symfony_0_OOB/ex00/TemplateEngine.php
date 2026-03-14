@@ -2,6 +2,18 @@
 
 class   TemplateEngine{
 
+    public function __construct()
+    {}
+
+    /**
+     * Crée un fichier HTML en remplaçant les paramètres dans le template.
+     *
+     * @param string $fileName : file name of the generated HTML file.
+     * @param string $templateName : name of the template file.
+     * @param array $parameters : array of parameters to replace.
+     * @return bool True if successful, false otherwise.
+     */
+
     public function createFile(string $fileName, string $templateName, array $parameters)
     {
         if (sizeof($parameters) != 4){

@@ -1,6 +1,7 @@
 <?php
 
-class   TemplateEngine{
+class   TemplateEngine {
+
 
     function createFile(string $fileName, Text $text): bool
     {

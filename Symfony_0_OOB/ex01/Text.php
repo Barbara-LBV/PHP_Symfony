@@ -24,6 +24,7 @@ class Text{
             print("Error: Element must be string.\n");
             return false;
         }
+        
         if (empty($this->_data)) {
             $this->_data = array($new_data);
         } else {
@@ -35,15 +36,20 @@ class Text{
     {
         if (empty($this->_data)) {
             print("Error: No data to read.\n");
-            return false;
+            return array();
         }
+
         $content[] = '';
+
         foreach ($this->_data as $str)
             $content[] .= "<p>" . htmlspecialchars($str) . "</p>\n";
+
         $size = count($content) - 1;
+
         // Remove the last empty element if it exists
         if ($size >= 0)
             $content[$size] = trim($content[$size]);
+
         return $content;
     }
 }
