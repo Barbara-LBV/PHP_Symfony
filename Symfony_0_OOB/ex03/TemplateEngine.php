@@ -22,8 +22,9 @@ class   TemplateEngine{
             print("Error: Unable to open file for writing.\n");
             return false;
         }
-        
-        fwrite($file, $this->elem->result);
+        $content =  $this->elem->getResult();
+        print("Content to write: " . $this->elem->getResult() . "\n"); // Debugging line
+        fwrite($file, $content);
         fclose($file);
         return true;
     }

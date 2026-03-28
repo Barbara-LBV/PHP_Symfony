@@ -1,94 +1,106 @@
 <?php 
 
 class Elem {
-    private string  $content;
-    private string  $element;
-    private array   $htmlElements = []; // array of strings
-    private array   $autoClosing = ['meta', 'br', 'hr', 'img'];
-    private array   $priorityTags = ['html', 'head', 'meta', 'title', 'body'];
-    private array   $tags = ['html', 'head', 'meta', 'title', 'body', 'div','p', 'img',
-        'hr', 'br', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span'];
+    private string $content;
+    private string $element;
+    private string $result = '';
+    private array $htmlElements = []; // array of strings
+    public array $autoClosing = ['meta', 'br', 'hr', 'img'];
+    public array $closingTags = ['html', 'head', 'meta', 'title', 'body'];
+    public array $tags = ['html', 'head', 'meta', 'title', 'body', 'div','p', 'img',
+    'hr', 'br', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span'];
     
     public function __construct(string $element, string $content = '') {
         if (!in_array($element, $this->tags)) {
             print("Error: Input is not an supported HTML tag.\n");
-            return false;
+            return ;
         }
+
         $this->element = $element;
         $this->content = $content;
 
-        $key = array_search($this->element, $this->tags);
+        $key = -1;
+
+        if (array_search($this->element, $this->autoClosing) !== false) {
+            $key = 0;
+        } elseif (array_search($this->element, $this->closingTags) !== false) {
+            $key = 1;
+        }
 
         switch ($key){
-            case 0: // html tag
-                $this->htmlElements[$key] = "<{$this->element}>";
-                break;
-            case 1: // head tag
-                $this->htmlElements[$key] = "<{$this->element}>";
-                break;
-            case 2: // meta tag
+            case 0: // auto Closing Tags
                 $this->htmlElements[$key] = "<{$this->element} {$this->content}/>";
                 break;
-            case 3: // title tag
-                $this->htmlElements[$key] = "<{$this->element}>{$this->content}</{$this->element}>";
-                break;
-            case 4: // body tag
-                $this->htmlElements[$key] = "<{$this->element}>";
-                break;
-            case 5: // div tag
-                if ($this->content !== '')
-                    $this->htmlElements[$key] = "<{$this->element}>{$this->content}</{$this->element}>";
-                else
-                    $this->htmlElements[$key] = "<{$this->element}>";
-                break;
-            case 6: // p tag
-                if ($this->content !== '')
-                    $this->htmlElements[$key] = "<{$this->element}>{$this->content}</{$this->element}>";
-                else
-                    $this->htmlElements[$key] = "<{$this->element}>";
+            case 1: // closing tags after data
+                $this->htmlElements[$key] = "<{$this->element}>{$this->content}";
                 break;
             default: // other tags
-                if (in_array($this->element, $this->autoClosing)) 
-                    $this->htmlElements[] = "<{$this->element} {$this->content}/>";
-                elseif(in_array($this->element, $this->tags)) 
-                    $this->htmlElements[] = "<{$this->element}>{$this->content}</{$this->element}>";
+                $this->htmlElements[] = "<{$this->element}>{$this->content}</{$this->element}>";
                 break;
-            }
-            ksort($this->htmlElements);
         }
+        // ksort($this->htmlElements);
+    }
+
+    public function __destruct() {}
+
+    public function getElement(): string {
+        return $this->element;
+    }
+
+    public function getContent(): string {
+        return $this->content;
+    }
+
+    public function getHtmlElements(): array {
+        return $this->htmlElements;
+    }
+
+    public function getAttributes(): array {
+        return $this->attributes;
+    }
+
+    public function getResult(): string {
+        return $this->result;
+    }
+
+    public function setResult($result): void {
+        $this->result = $result;
+        // print("Current result: " . $this->result . "fin\n"); // Debugging line
+    }
+
 
     public function pushElement(Elem $elem): void {
         if (!$elem instanceof Elem || !$elem) {
             print("Error: Invalid parameter: must be an Elem object.\n");
             return ;
         }
+
         if ($elem->htmlElements) {
             foreach ($elem->htmlElements as $key => $value) {
-                if (!array_key_exists($key, $this->htmlElements))
-                    $this->htmlElements[$key] = $value;
-                elseif ((strstr($value, '<div>') || strstr($value, '<p>')) 
-                    && in_array($value, $this->htmlElements)) {
-                    $this->htmlElements[] = $value;
-                } elseif (in_array($value, $this->htmlElements))
+                // if (!array_key_exists($key, $this->htmlElements))
+                //     $this->htmlElements[$key] = $value;
+                // elseif ((strstr($value, '<div>') || strstr($value, '<p>')) && in_array($value, $this->htmlElements)) {
+                //     $this->htmlElements[] = $value;
+                if (in_array($value, $this->htmlElements))
                     continue ;
-                elseif (!in_array($value, $this->priorityTags))
+                elseif (!in_array($value, $this->closingTags))
                     $this->htmlElements[] = $value;
             }
         } else {
             print("Error: Element has no HTML content.\n");
             return ;
         }
-        ksort($this->htmlElements);
+        // ksort($this->htmlElements);
     }
 
-            public function getHTML(): string {      
+    public function getHTML(): string { 
         if (empty($this->htmlElements)) {
             print("Error: No HTML elements to render.\n");
             return '';
         }
 
         // Reset result and openTags for each call
-        $this->result = '';
+        $result = '';
         $openTags = [];
 
         $this->insertClosingHeadTag();
@@ -96,6 +108,7 @@ class Elem {
 
         $maxIndex = count($this->htmlElements);
         for ($i = -1; $i < $maxIndex; $i++) {
+
             // check if the index exists in htmlElements
             if (array_key_exists($i, $this->htmlElements)) {
                 $element = $this->htmlElements[$i];
@@ -114,16 +127,21 @@ class Elem {
                         if ($key !== false)
                             array_splice($openTags, $key, 1);
                     }
-                } 
-                $this->result .= $this->indentElement($element, count($openTags) - 1);
+                }
+                print("openTags stack: " . implode(', ', $openTags) . "\n"); // Debugging line
+                $result .= $this->indentElement($element, count($openTags) - 1, $openTags);
+                $this->setResult($result);
             }
         }
+        
         // closing remaining open tags
         while (!empty($openTags)) {
             $tagToClose = array_pop($openTags);
-            $this->result .= str_repeat('  ', count($openTags)) . "</{$tagToClose}>\n";
+            $result .= str_repeat(' ', count($openTags)) . "</{$tagToClose}>\n";
         }
-        return $this->result;
+        $this->setResult($result);
+        print("Final HTML result:\n" . $result . "\n"); // Debugging line
+        return $result;
     }
 
     private function insertClosingHeadTag(): void {
@@ -137,7 +155,7 @@ class Elem {
             // check if </head> already exists
             $closeHeadIndex = array_search('</head>', $this->htmlElements);
             if ($closeHeadIndex === false || $closeHeadIndex > $bodyIndex) {
-                // Insert </head> just before <body>
+            // Insert </head> just before <body>
                 array_splice($this->htmlElements, $bodyIndex, 0, ['</head>']);
             }
         }
@@ -151,7 +169,7 @@ class Elem {
         foreach ($this->htmlElements as $i => $element) {
             $trim_element = trim(str_replace(['<', '>'], ' ', $element));
             if (in_array($trim_element, $parentTags) && $flag === 0) {
-                $previousTag = "</{$trim_element}>";    
+                $previousTag = "</{$trim_element}>"; 
                 $flag = 1;
             } elseif (in_array($trim_element, $parentTags) && $flag === 1) {
                 array_splice($this->htmlElements, $i, 0, $previousTag);
@@ -160,8 +178,16 @@ class Elem {
         }
     }
     
-    private function indentElement(string $element, int $level): string {
-        $indent = str_repeat('  ', $level);
+    private function indentElement(string $element, int $level, array $openTags): string {
+        // print("Indenting element: " . $element . " at level: " . $level . "\n"); // Debugging line
+        if ($level <= 0) 
+            $level = 0; // Ensure level is not negative
+        elseif(array_search('body', $openTags) !== false && $element !== '<body>') {
+            $level += 1;
+            print("level increased for body tag. New level: " . $level . "\n"); // Debugging line
+        }
+            
+        $indent = str_repeat(' ', $level);
         return $indent . $element . "\n";
     }
 }

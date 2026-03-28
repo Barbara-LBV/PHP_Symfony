@@ -13,7 +13,6 @@ class   TemplateEngine{
 
         $template = file_get_contents('template.html');
         if ($template === false) {
-            fclose($file);
             return false;
         }
 
@@ -21,7 +20,6 @@ class   TemplateEngine{
         $attributes = $reflectedClass->getProperties();
 
         if ($attributes === false) {
-            fclose($file);
             print("Error: Unable to get parameters from the object.\n");
             return false;
         }
@@ -33,14 +31,21 @@ class   TemplateEngine{
         }
 
         $content = '';
+        $ordreredAttributes = ['name', 'price', 'resistance', 'description', 'comment'];
         $names = [];
         $values = [];
 
         foreach ($attributes as $attribute) {
             $attribute->setAccessible(true);
             $name = $attribute->getName();
-            $names[] = '{' . $name . '}';
-            $values[] = $attribute->getValue($text);
+            $key = array_search($name, $ordreredAttributes);
+            
+            if ($key !== false) {
+                $names[$key] = '{' . $name . '}';
+                $values[$key] = $attribute->getValue($text);
+            } else {
+                print("Warning: Attribute '{$name}' is not in the ordered attributes list and will be ignored.\n");
+            }
         }
 
         $content = str_replace($names, $values, $template);
