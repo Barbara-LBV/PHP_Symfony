@@ -4,7 +4,7 @@ include('./TemplateEngine.php');
 
 $elem = new Elem('html');
 $body = new Elem('body');
-$body->pushElement(new Elem('p', 'truc'));
+$body->pushElement(new Elem('p', 'Lorem ipsum'));
 $elem->pushElement($body);
 echo $elem->getHTML();
 
@@ -16,10 +16,8 @@ $div1 = new Elem('div', 'Machin et bidule');
 $span = new Elem('span', 'This is sentence');
 $div2 = new Elem('div');
 $div1->pushElement($span);
-$body2 = new Elem('body');
 $elem->pushElement($meta);
 $elem->pushElement($div1);
-$elem->pushElement($body2);
 $elem->pushElement(new Elem('title', 'Fucking PHP'));
 $elem->pushElement(new Elem('head'));
 $elem->pushElement($div2);

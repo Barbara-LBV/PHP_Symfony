@@ -2,22 +2,21 @@
 
 include './HotBeverage.php';
 
-class   TemplateEngine {
+class   TemplateEngine{
 
-    function createFile(HotBeverage $beverage): bool
+    function createFile(HotBeverage $text): bool
     {
-        if (!$beverage instanceof HotBeverage) {
+        if (!$text instanceof HotBeverage) {
             print("Error: Invalid parameter: must be an HotBeverage object.\n");
             return false;
         }
 
         $template = file_get_contents('template.html');
         if ($template === false) {
-            fclose($template);
             return false;
         }
 
-        $reflectedClass = new ReflectionClass($beverage);
+        $reflectedClass = new ReflectionClass($text);
         $attributes = $reflectedClass->getProperties();
 
         if ($attributes === false) {
@@ -32,16 +31,25 @@ class   TemplateEngine {
         }
 
         $content = '';
+        $ordreredAttributes = ['name', 'price', 'resistance', 'description', 'comment'];
         $names = [];
         $values = [];
 
         foreach ($attributes as $attribute) {
+            $attribute->setAccessible(true);
             $name = $attribute->getName();
-            $names[] = '{' . $name . '}';
-            $values[] = $attribute->getValue($beverage);
+            $key = array_search($name, $ordreredAttributes);
+            
+            if ($key !== false) {
+                $names[$key] = '{' . $name . '}';
+                $values[$key] = $attribute->getValue($text);
+            } else {
+                print("Warning: Attribute '{$name}' is not in the ordered attributes list and will be ignored.\n");
+            }
         }
- 
+
         $content = str_replace($names, $values, $template);
+        
         fwrite($file, $content);
         fclose($file);
         return true;
