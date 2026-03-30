@@ -12,7 +12,7 @@ class Elem {
 
     private array   $autoClosing = ['meta', 'br', 'hr', 'img'];
     private array   $priorityTags = ['html', 'head', 'meta', 'title', 'body'];
-    private array   $parentTags = ['div', 'table', 'tr', 'ol', 'ul'];
+    private array   $parentTags = ['html','body','div', 'table', 'tr', 'ol', 'ul'];
     private array   $closingTags = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'li', 'span', 'th', 'td', 'p'];
     private array   $tags = ['html', 'head', 'meta', 'title', 'body', 'div', 'p', 'img','hr', 'br', 
     'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'table', 'tr', 'th', 'td', 'ul', 'ol', 'li'];
@@ -26,42 +26,8 @@ class Elem {
         $this->attributes = $attributes;
 		$this->setResult('');
 
-        $key = array_search($this->element, $this->tags);
         $value = $this->initiateAttributes($this->attributes);
-  
-        switch ($key){
-            case 0: // html tag
-                $this->htmlElements[$key] = $value . ">";
-                break;
-            case 1: // head tag
-                $this->htmlElements[$key] = $value . ">";
-                break;
-            case 2: // meta tag
-                $this->htmlElements[$key] = "$value {$this->content}/>";
-                break;
-            case 3: // title tag
-                $this->htmlElements[$key] = "{$value}>{$this->content}</{$this->element}>";
-                break;
-            case 4: // body tag
-                $this->htmlElements[$key] = "{$value}>";
-                break;
-            case 5: // div tag
-                if ($this->content !== '')
-                    $this->htmlElements[$key] = "{$value}>{$this->content}</{$this->element}>";
-                else
-                    $this->htmlElements[$key] = "{$value}>";
-                    break;
-            case 6: // p tag
-                if ($this->content !== '')
-                    $this->htmlElements[$key] = "{$value}>{$this->content}</{$this->element}>";
-                else
-                    $this->htmlElements[$key] = "{$value}>";
-                break;
-            default: // other tags
-                $this->addOtherTags($value, 7);
-                break;
-            }
-        ksort($this->htmlElements);
+        $this->addOtherTags($value);
     }
 
     public function __destruct(){}
@@ -96,20 +62,20 @@ class Elem {
         if ($elem->htmlElements) {
             foreach ($elem->htmlElements as $key => $value) {
                 $trim_value = trim(str_replace($toReplace, ' ', $value));
-                if (in_array($value, $this->htmlElements))
+                if (in_array($value, $this->htmlElements)) {
+                    print("1- Already added tag $value\n");
                     continue ;
+                }   
                 elseif (!array_key_exists($key, $this->htmlElements)){
-                    $this->htmlElements[$key] = $value; 
+                    print("2- Adding new tag: $value\n");
+                    $this->htmlElements[] = $value; 
                 } 
                 elseif (($value === '<div>' || $value === '<p>') && in_array($value, $this->htmlElements)) {
+                    print("3- Adding new tag: $value\n");
                     $this->htmlElements[] = $value;
                 } 
-                elseif (array_key_exists($key, $this->htmlElements)
-                    && in_array($trim_value, $this->priorityTags)
-                    && !in_array($value, $this->htmlElements)) {
-                        array_splice($this->htmlElements, $key, 0, $value);
-                } 
                 elseif (!in_array($trim_value, $this->priorityTags))
+                    print("5- Adding new tag: $value\n");
                     $this->htmlElements[] = $value;
             }
         } 
@@ -117,7 +83,6 @@ class Elem {
             print("Error: Pushed Element has no HTML content.\n");
             return ;
         }
-        $this->orderTags();
     }
 
     public function getHTML(): string {      
@@ -202,36 +167,49 @@ class Elem {
 
     private function insertClosingHtmlTag(array $newElements): array {
         // Ensure </body> and </html> are at the end of the document
-        if (!in_array('</body>', $newElements))
-             $newElements[] = "</body>";
+        // print_r($newElements); // Debugging line
+        if (in_array('<body>', $newElements) && !in_array('</body>', $newElements))
+            $newElements[] = "</body>";
         elseif (in_array('</body>', $newElements)) {
+            // print("6- Ensuring </body> is at the end of the document.\n");
             $key = array_search('</body>', $newElements);
-            if ($key !== count($newElements) - 1) {
+            print("Found </body> at index: " . $key . "\n"); // Debugging line
+            print("count " .count($newElements) . "\n"); // Debugging line
+            if (array_search('</html>', $newElements) && $key !== count($newElements) - 2) {
                 //Remove </body> from its current position and add it to the end
+                print("6 \n");
+                array_splice($newElements, $key, 1);
+                $newElements[count($newElements) - 2] = '</body>'; 
+            }
+            elseif (!array_search('</html>', $newElements) && $key !== count($newElements) - 1) {
+                //Remove </body> from its current position and add it to the end
+                print("7 \n");
                 array_splice($newElements, $key, 1);
                 $newElements[] = '</body>'; 
             }
         }
 
-        if (!in_array('</html>', $newElements))
+        if (in_array('<html>', $newElements) && !in_array('</html>', $newElements))
              $newElements[] = "</html>";
         elseif (in_array('</html>', $newElements)) {
+            print("7- Ensuring </html> is at the end of the document.\n");
             $key = array_search('</html>', $newElements);
+            print("Found </html> at index: " . $key . "\n"); // Debugging line
             if ($key !== count($newElements) - 1) {
                 // Remove </html> from its current position and add it to the end
                 array_splice($newElements, $key, 1); 
-                $newElements[] = '</html>';
+                $newElements[count($newElements) - 1] = '</html>';
             }
         }
         return $newElements;
     }
 
-    private function addOtherTags(string $value, int $key): void {
+    private function addOtherTags(string $value): void {
         if (in_array($this->element, $this->autoClosing)){
             $this->htmlElements[] = "{$value} {$this->content}/>";
         }   
         elseif(in_array($this->element, $this->closingTags)){
-            $this->htmlElements[$key] = "{$value}>{$this->content}</{$this->element}>";
+            $this->htmlElements[] = "{$value}>{$this->content}</{$this->element}>";
         }
         elseif(in_array($this->element, $this->parentTags)){
             $this->htmlElements[] = "{$value}>{$this->content}";
@@ -257,37 +235,6 @@ class Elem {
         return $indent . $element . "\n";
     }
 
-    private function getTagName(string $tag): ?string {
-        // Extract the tag name using regex, ignoring attributes and self-closing syntax
-        return preg_match('/^<\s*([a-z][a-z0-9]*)\b/i', $tag, $matches) ? strtolower($matches[1]) : null;
-    }
-
-    private function orderTags(): void {
-        $result  = [];
-        $usedIdx = [];
-
-        // Place priority tags in the correct order
-        foreach ($this->priorityTags as $p) {
-            foreach ($this->htmlElements as $i => $tag) {
-                if (isset($usedIdx[$i])) 
-                    continue;
-                if ($this->getTagName($tag) === $p) {
-                    $result[] = $tag;
-                    $usedIdx[$i] = true;   // mark this index as used
-                }
-            }
-        }
-
-        // then place all other tags, keeping the original order, without duplicates
-        foreach ($this->htmlElements as $i => $tag) {
-            if (!isset($usedIdx[$i]) && !in_array($tag, $result, true)) {
-                $result[] = $tag;
-            }
-        }
-
-        // Reindex the array to ensure it starts from 0 and has no gaps
-        $this->htmlElements = array_values($result);
-    }
 }
 
 ?>

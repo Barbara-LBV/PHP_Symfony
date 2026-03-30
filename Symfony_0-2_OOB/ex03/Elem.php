@@ -6,7 +6,7 @@ class Elem {
     private string $result = '';
     private array $htmlElements = []; // array of strings
     public array $autoClosing = ['meta', 'br', 'hr', 'img'];
-    public array $closingTags = ['html', 'head', 'meta', 'title', 'body'];
+    public array $openTags = ['html', 'head', 'body', 'div', 'p'];
     public array $tags = ['html', 'head', 'meta', 'title', 'body', 'div','p', 'img',
     'hr', 'br', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span'];
     
@@ -23,7 +23,7 @@ class Elem {
 
         if (array_search($this->element, $this->autoClosing) !== false) {
             $key = 0;
-        } elseif (array_search($this->element, $this->closingTags) !== false) {
+        } elseif (array_search($this->element, $this->openTags) !== false) {
             $key = 1;
         }
 
@@ -31,14 +31,13 @@ class Elem {
             case 0: // auto Closing Tags
                 $this->htmlElements[$key] = "<{$this->element} {$this->content}/>";
                 break;
-            case 1: // closing tags after data
+            case 1: // tags to close after
                 $this->htmlElements[$key] = "<{$this->element}>{$this->content}";
                 break;
-            default: // other tags
+            default: // closing tags after data
                 $this->htmlElements[] = "<{$this->element}>{$this->content}</{$this->element}>";
                 break;
         }
-        // ksort($this->htmlElements);
     }
 
     public function __destruct() {}
@@ -63,11 +62,9 @@ class Elem {
         return $this->result;
     }
 
-    public function setResult($result): void {
+    public function setResult(string $result): void {
         $this->result = $result;
-        // print("Current result: " . $this->result . "fin\n"); // Debugging line
     }
-
 
     public function pushElement(Elem $elem): void {
         if (!$elem instanceof Elem || !$elem) {
@@ -77,13 +74,9 @@ class Elem {
 
         if ($elem->htmlElements) {
             foreach ($elem->htmlElements as $key => $value) {
-                // if (!array_key_exists($key, $this->htmlElements))
-                //     $this->htmlElements[$key] = $value;
-                // elseif ((strstr($value, '<div>') || strstr($value, '<p>')) && in_array($value, $this->htmlElements)) {
-                //     $this->htmlElements[] = $value;
                 if (in_array($value, $this->htmlElements))
                     continue ;
-                elseif (!in_array($value, $this->closingTags))
+                elseif (!in_array($value, $this->openTags))
                     $this->htmlElements[] = $value;
             }
         } else {
@@ -180,11 +173,10 @@ class Elem {
     
     private function indentElement(string $element, int $level, array $openTags): string {
         // print("Indenting element: " . $element . " at level: " . $level . "\n"); // Debugging line
-        if ($level <= 0) 
-            $level = 0; // Ensure level is not negative
-        elseif(array_search('body', $openTags) !== false && $element !== '<body>') {
+        $level = max(0, $level); // Ensure level is not negative
+        if(array_search('body', $openTags) !== false && $element !== '<body>') {
             $level += 1;
-            print("level increased for body tag. New level: " . $level . "\n"); // Debugging line
+            // print("level increased for body tag. New level: " . $level . "\n"); // Debugging line
         }
             
         $indent = str_repeat(' ', $level);
