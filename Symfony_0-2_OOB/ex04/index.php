@@ -5,7 +5,7 @@ include('./TemplateEngine.php');
 try {
     $elem = new Elem('html');
     $body = new Elem('body');
-    // $body->pushElement(new Elem('elementary', 'truc'));
+    $body->pushElement(new Elem('p', 'truc'));
     print ("******************************\n");
     $elem->pushElement($body);
     echo $elem->getHTML();
@@ -37,4 +37,11 @@ try {
 } catch (TypeError $e) {
     echo $e->getMessage() . "\n";
 } 
+print ("******************************\n");
+$elem = new Elem('html');
+$body = new Elem('body');
+$body->pushElement(new Elem('p', 'Lorem ipsum', ['class'=> 'text-muted']));
+$elem->pushElement($body);
+echo $elem->getHTML();
+// $elem = new Elem('undefined'); // Leve une exception de type MyException
 ?>
