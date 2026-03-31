@@ -57,26 +57,14 @@ class Elem {
     }
 
     public function pushElement(Elem $elem): void {
-        $toReplace = ['<', '>', '/  '];
-
         if ($elem->htmlElements) {
             foreach ($elem->htmlElements as $key => $value) {
-                $trim_value = trim(str_replace($toReplace, ' ', $value));
                 if (in_array($value, $this->htmlElements)) {
-                    print("1- Already added tag $value\n");
                     continue ;
                 }   
-                elseif (!array_key_exists($key, $this->htmlElements)){
-                    print("2- Adding new tag: $value\n");
+                else {
                     $this->htmlElements[] = $value; 
                 } 
-                elseif (($value === '<div>' || $value === '<p>') && in_array($value, $this->htmlElements)) {
-                    print("3- Adding new tag: $value\n");
-                    $this->htmlElements[] = $value;
-                } 
-                elseif (!in_array($trim_value, $this->priorityTags))
-                    print("5- Adding new tag: $value\n");
-                    $this->htmlElements[] = $value;
             }
         } 
         else {
@@ -97,7 +85,6 @@ class Elem {
 
         $this->insertClosingHeadTag();
         $this->insertClosingParentTags();
-
         foreach ($this->htmlElements as $element) {
             // Track open tags for indentation (already closed by insertClosingParentTags)
             if (!preg_match('/^<\//', $element)) { // open tag
@@ -141,11 +128,18 @@ class Elem {
     private function insertClosingParentTags(): void {
         $stack = [];
         $newElements = [];
+        $parentTags = ['div', 'table', 'tr', 'ol', 'ul'];
+ 
         foreach ($this->htmlElements as $element) {
             // get tag name from element using regex
+            if (preg_match('/^<(?!\/)(?![^>]*\/>)[a-zA-Z][a-zA-Z0-9]*\b[^>]*>\s*\S/s', $element)) {
+                // if there is content after the tag, add it to the new elements and continue
+                $newElements[] = $element;
+                continue;
+            }
             if (preg_match('/^<([a-zA-Z0-9]+)/', $element, $matches)) {
                 $tag = $matches[1];
-                if (in_array($tag, $this->parentTags)) {
+                if (in_array($tag, $parentTags)) {
                     // if a parent tag is encountered, check if the previous one is the same and close it if necessary
                     while (!empty($stack) && $stack[count($stack)-1] === $tag) {
                         $newElements[] = "</$tag>";
@@ -166,39 +160,39 @@ class Elem {
     }
 
     private function insertClosingHtmlTag(array $newElements): array {
-        // Ensure </body> and </html> are at the end of the document
-        // print_r($newElements); // Debugging line
-        if (in_array('<body>', $newElements) && !in_array('</body>', $newElements))
-            $newElements[] = "</body>";
-        elseif (in_array('</body>', $newElements)) {
-            // print("6- Ensuring </body> is at the end of the document.\n");
-            $key = array_search('</body>', $newElements);
-            print("Found </body> at index: " . $key . "\n"); // Debugging line
-            print("count " .count($newElements) . "\n"); // Debugging line
-            if (array_search('</html>', $newElements) && $key !== count($newElements) - 2) {
-                //Remove </body> from its current position and add it to the end
-                print("6 \n");
-                array_splice($newElements, $key, 1);
-                $newElements[count($newElements) - 2] = '</body>'; 
-            }
-            elseif (!array_search('</html>', $newElements) && $key !== count($newElements) - 1) {
-                //Remove </body> from its current position and add it to the end
-                print("7 \n");
-                array_splice($newElements, $key, 1);
-                $newElements[] = '</body>'; 
+        $lastIndex = count($newElements) - 1;
+
+        if (in_array('<html>', $newElements) && !in_array('</html>', $newElements))
+            $newElements[] = "</html>";
+        elseif (in_array('</html>', $newElements)) {
+            $htmlKey = array_search('</html>', $newElements);
+            if ($htmlKey !== $lastIndex) {
+                // Remove </html> from its current position and add it to the end
+                array_splice($newElements, $htmlKey, 1); 
+                $newElements[] = '</html>';
             }
         }
 
-        if (in_array('<html>', $newElements) && !in_array('</html>', $newElements))
-             $newElements[] = "</html>";
-        elseif (in_array('</html>', $newElements)) {
-            print("7- Ensuring </html> is at the end of the document.\n");
-            $key = array_search('</html>', $newElements);
-            print("Found </html> at index: " . $key . "\n"); // Debugging line
-            if ($key !== count($newElements) - 1) {
-                // Remove </html> from its current position and add it to the end
-                array_splice($newElements, $key, 1); 
-                $newElements[count($newElements) - 1] = '</html>';
+        $lastIndex = count($newElements) - 1;
+
+        // If body is present without a closing tag, add it before </html> or at the end if </html> is not present
+        if (in_array('<body>', $newElements) && !in_array('</body>', $newElements) && in_array('</html>', $newElements))
+            array_splice($newElements, $lastIndex, 0, ["</body>"]);
+        elseif (in_array('<body>', $newElements) && !in_array('</body>', $newElements) && !in_array('</html>', $newElements))
+            $newElements[] = '</body>';
+        
+        // If </body> is present but not at the end, move it to the end before </html> or at the end if </html> is not present
+        elseif (in_array('</body>', $newElements)) {
+            $bodyKey = array_search('</body>', $newElements);
+            $htmlKey = array_search('</html>', $newElements);
+            if ($htmlKey === false && $bodyKey !== $lastIndex) {
+                // Remove </body> from its current position and add it to the end
+                array_splice($newElements, $bodyKey, 1);
+                array_splice($newElements, $lastIndex, 0, ['</body>']);
+            } elseif ($htmlKey === $lastIndex && $bodyKey !== $lastIndex - 1) {
+                // Remove </body> from its current position and add it just before </html>
+                array_splice($newElements, $bodyKey, 1);
+                array_splice($newElements, $lastIndex - 1, 0, ['</body>']);
             }
         }
         return $newElements;
@@ -212,7 +206,13 @@ class Elem {
             $this->htmlElements[] = "{$value}>{$this->content}</{$this->element}>";
         }
         elseif(in_array($this->element, $this->parentTags)){
-            $this->htmlElements[] = "{$value}>{$this->content}";
+            if ($this->element === 'div' && !empty($this->content)) {
+                $this->htmlElements[] = "{$value}>{$this->content}</{$this->element}>";
+            } elseif ($this->element === 'div' && empty($this->content)){
+                $this->htmlElements[] = "{$value}>";
+            } else {
+                $this->htmlElements[] = "{$value}>{$this->content}";
+            }
         }
     }
     
@@ -224,12 +224,11 @@ class Elem {
     }
 
 	private function indentElement(string $element, int $level): string {
-		$parentTags = ['<head>', '<body>', '<div>', '<table>', '<tr>', '<ol>', '<ul>'];
         // Ensure level is not negative
         $level = max(0, $level); 
         if ($element === '<html>' || $element === '</html>')
             $level = 0;
-        elseif (array_search($element, $parentTags) === false)
+        elseif (array_search($element, $this->parentTags) === false)
             $level += 1;
         $indent = str_repeat(' ', $level);
         return $indent . $element . "\n";
