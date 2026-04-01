@@ -108,23 +108,31 @@ class Elem {
         // Insert </head> tag before <body> if necessary
         $headIndex = array_search('<head>', $this->htmlElements);
         $bodyIndex = array_search('<body>', $this->htmlElements);
+        $closeHeadIndex = array_search('</head>', $this->htmlElements);
 
         // Reindex the array
         $this->htmlElements = array_values($this->htmlElements); 
         if ($headIndex !== false && $bodyIndex !== false && $headIndex < $bodyIndex) {
-            // check if </head> already exists
-            $closeHeadIndex = array_search('</head>', $this->htmlElements);
             if ($closeHeadIndex === false || $closeHeadIndex > $bodyIndex) {
                 // Insert </head> just before <body>
                 array_splice($this->htmlElements, $bodyIndex, 0, ['</head>']);
             }
-        }
-        else if ($headIndex !== false && $bodyIndex !== false && $headIndex > $bodyIndex) {
-            // check if </head> already exists
-            $closeHeadIndex = array_search('</head>', $this->htmlElements);
+        } else if ($headIndex !== false && $bodyIndex !== false && $headIndex > $bodyIndex) {
             if ($closeHeadIndex === false) {
                 // Insert </head> just after <head>
                 array_splice($this->htmlElements, $headIndex + 1, 0, ['</head>']);
+            }
+        } else if ($headIndex !== false && $bodyIndex === false) {
+            $metaIndex = $this->findFirstElementStartingWith('<meta');          
+            $titleIndex = $this->findFirstElementStartingWith('<title');
+            if ($closeHeadIndex === false) {
+                if ($metaIndex !== false || $titleIndex !== false) {
+                    $insertIndex = max($metaIndex, $titleIndex) + 1;
+                    array_splice($this->htmlElements, $insertIndex, 0, ['</head>']);
+                } else {
+                    // Insert </head> just after <head>
+                    array_splice($this->htmlElements, $headIndex + 1, 0, ['</head>']);
+                }
             }
         }
     }
@@ -202,21 +210,28 @@ class Elem {
         return $newElements;
     }
 
+    private function findFirstElementStartingWith(string $prefix): int|false {
+        foreach ($this->htmlElements as $index => $element) {
+            if (str_starts_with($element, $prefix)) {
+                return $index;
+            }
+        }
+        return false;
+    }
+
     private function addOtherTags(string $value): void {
         if (in_array($this->element, $this->autoClosing)){
             $this->htmlElements[] = "{$value} {$this->content}/>";
         }   
-        elseif(in_array($this->element, $this->closingTags)){
+        elseif(in_array($this->element, $this->closingTags))
             $this->htmlElements[] = "{$value}>{$this->content}</{$this->element}>";
-        }
         elseif(in_array($this->element, $this->parentTags)){
-            if ($this->element === 'div' && !empty($this->content)) {
+            if ($this->element === 'div' && !empty($this->content)) 
                 $this->htmlElements[] = "{$value}>{$this->content}</{$this->element}>";
-            } elseif ($this->element === 'div' && empty($this->content)){
+            elseif ($this->element === 'div' && empty($this->content))
                 $this->htmlElements[] = "{$value}>";
-            } else {
-                $this->htmlElements[] = "{$value}>{$this->content}";
-            }
+            else 
+                $this->htmlElements[] = "{$value}>{$this->content}"; 
         } 
 
     }
@@ -255,6 +270,10 @@ class Elem {
             print("Error: The <head> block is not properly structured.\n");
             return false;
         }
+        if (!$this->checkBodyblock()) {
+            print("Error: The <body> block is not properly structured.\n");
+            return false;
+        }
         if (!$this->checkTableTags()) {
             print("Error: The <table> block is not properly structured.\n");
             return false;
@@ -263,19 +282,14 @@ class Elem {
             print("Error: The list tags (<ul>, <ol>, <li>) are not properly structured.\n");
             return false;
         }
-        if (!$this->checkPTag()) {
-            print("Error: The <p> tags are not properly structured.\n");
-            return false;
-        }
         return true;
     }
 
     private function checkHtmlBlock(): bool {
         // Check if <head> and <body> tags are present and properly nested
-        $headOpenIndex = array_search('<head>', $this->htmlElements);
-        $headcloseIndex = array_search('</head>', $this->htmlElements);
-        $bodyIndex = array_search('<body>', $this->htmlElements);
-        // print("headOpenIndex: {$headOpenIndex}, headcloseIndex: {$headcloseIndex}, bodyIndex: {$bodyIndex}\n"); //debug
+        $headOpenIndex = $this->findFirstElementStartingWith('<head');
+        $headcloseIndex = $this->findFirstElementStartingWith('</head>');
+        $bodyIndex = $this->findFirstElementStartingWith('<body');
 
         // check if head exists, it's directly placed after html tag
         if ($headOpenIndex !== false && $headOpenIndex !== 1) {
@@ -283,7 +297,7 @@ class Elem {
             return false;
         }
         // check if head is before body
-        if ($headOpenIndex !== false && $bodyIndex !== false && $headOpenIndex < $bodyIndex) {
+        if ($headOpenIndex !== false && $bodyIndex !== false && $headOpenIndex > $bodyIndex) {
             echo "Error: <head> tag must be placed before <body> tag.\n";
             return false;
         }
@@ -296,25 +310,88 @@ class Elem {
     }
 
     private function checkTableTags(): bool {
-        // Check if <table> tag is present and properly closed
         // Check if <tr>, <th>, and <td> tags are properly nested within <table>
+        $trIndex = $this->findFirstElementStartingWith('<tr');
+        $thIndex = $this->findFirstElementStartingWith('<th');
+        $tdIndex = $this->findFirstElementStartingWith('<td');
+        $tableIndex = $this->findFirstElementStartingWith('<table');
+
+        // check if <tr>, <th>, and <td> tags are present within a <table> tag
+        if (($trIndex !== false || $thIndex !== false || $tdIndex !== false) && $tableIndex === false) {
+            print("Error: <table> tag absent whereas <tr>, <th>, and <td> tags must be nested within a <table> block.\n");
+            return false;
+        } 
+        // check if <tr> and <th> tags are present without <td> tag
+        else if (($tdIndex !== false || $thIndex !== false) && $trIndex === false){
+            print("Error: <tr> and <th> tags must be nested within a <td> block.\n");
+            return false;
+        } 
+        // check if <tr> tags are properly nested within <table>, <td> and <th> tags are properly nested within <tr>
+        else if ($tableIndex !== false) {
+            if ($trIndex !== false && $trIndex !== $tableIndex + 1) {
+                print("Error: <tr> tag must be directly nested after <table> block.\n");
+                return false;
+            } else if ($trIndex !== false && $tdIndex !== false && $tdIndex !== $trIndex + 1) {
+                print("Error: <td> tag must be nested within a <tr> block.\n");
+                return false;
+            } else if ($trIndex !== false && $thIndex !== false && $thIndex !== $trIndex + 1) {
+                print("Error: <th> tag must be nested within a <tr> block.\n");
+                return false;
+            } 
+        }
         return true;
     }
 
     private function checkListTags(): bool  {
-        // Check if <ul> or <ol> tags are present and properly closed
         // Check if <li> tags are properly nested within <ul> or <ol>
+        $liIndex = $this->findFirstElementStartingWith('<li');
+        $ulIndex = $this->findFirstElementStartingWith('<ul');
+        $olIndex = $this->findFirstElementStartingWith('<ol');
+
+        if ($liIndex !== false && $ulIndex === false && $olIndex === false) {
+            print("Error: <li> tags must be nested within <ul> or <ol> block.\n");
+            return false;
+        } else if ($liIndex !== false && $ulIndex !== false && $liIndex !== $ulIndex + 1) {
+            print("Error: <li> tags must be nested within a <ul> block.\n");
+            return false;
+        } else if ($liIndex !== false && $olIndex !== false && $liIndex !== $olIndex + 1) {
+            print("Error: <li> tags must be nested within an <ol> block.\n");
+            return false;
+        }
         return true;
     }
 
     private function checkHeadBlock(): bool {
-        // Check if <head> tag is present and properly closed
         // Check if <meta> and <title> tags are present within <head>
+        $metaIndex= $this->findFirstElementStartingWith('<meta');
+        $titleIndex = $this->findFirstElementStartingWith('<title');
+        $headIndex = array_search('<head>', $this->htmlElements);
+
+        if ($headIndex === false && ($metaIndex !== false || $titleIndex !== false)) {
+            print("Error: <head> tag is missing.\n");
+            return false;
+        } elseif ($headIndex !== false)  {
+            if (($metaIndex !== false && $metaIndex < $headIndex) || ($titleIndex !== false && $titleIndex < $headIndex)) {
+                print("Error: <meta> or <title> tag is not nested in <head> block.\n");
+                return false;
+            }
+        }
         return true;
     }
+    
+    private function checkBodyBlock(): bool {
+        // Check if <head> and <body> tags are present and properly nested
+        $headcloseIndex = $this->findFirstElementStartingWith('</head>');
+        $bodyOpenIndex = $this->findFirstElementStartingWith('<body');
+        $htmlCloseIndex = $this->findFirstElementStartingWith('</html>');
 
-    private function checkPTag(): bool {
-        // Check if <p> tags are properly closed and not nested within each other
+        // check if body exists, it's directly placed after html tag
+        if ($bodyOpenIndex === false && $headcloseIndex !== false && $htmlCloseIndex !== false) {
+            if ($htmlCloseIndex !== $headcloseIndex - 1) {
+                echo "Error: if no <body> tag is found, </head> must be placed directly before </html>.\n";
+                return false;
+            }
+        }
         return true;
     }
 }

@@ -11,8 +11,8 @@ class Elem {
     private array   $htmlElements = [];
 
     private array   $autoClosing = ['meta', 'br', 'hr', 'img'];
-    private array   $parentTags = ['html','body','div', 'table', 'tr', 'ol', 'ul'];
-    private array   $closingTags = ['title','h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'li', 'span', 'th', 'td', 'p'];
+    private array   $parentTags = ['html','head','body','div', 'table', 'tr', 'ol', 'ul'];
+    private array   $closingTags = ['title', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'li', 'span', 'th', 'td', 'p'];
     private array   $tags = ['html', 'head', 'meta', 'title', 'body', 'div', 'p', 'img', 'hr', 'br', 
     'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'table', 'tr', 'th', 'td', 'ul', 'ol', 'li'];
     
@@ -58,15 +58,12 @@ class Elem {
     public function pushElement(Elem $elem): void {
         if ($elem->htmlElements) {
             foreach ($elem->htmlElements as $key => $value) {
-                if (in_array($value, $this->htmlElements)) {
+                if (in_array($value, $this->htmlElements))
                     continue ;
-                }   
-                else {
+                else
                     $this->htmlElements[] = $value; 
-                } 
             }
-        } 
-        else {
+        } else {
             print("Error: Pushed Element has no HTML content.\n");
             return ;
         }
@@ -108,26 +105,34 @@ class Elem {
     }
 
     private function insertClosingHeadTag(): void {
-             // Insert </head> tag before <body> if necessary
+        // Insert </head> tag before <body> if necessary
         $headIndex = array_search('<head>', $this->htmlElements);
         $bodyIndex = array_search('<body>', $this->htmlElements);
+        $closeHeadIndex = array_search('</head>', $this->htmlElements);
 
         // Reindex the array
         $this->htmlElements = array_values($this->htmlElements); 
         if ($headIndex !== false && $bodyIndex !== false && $headIndex < $bodyIndex) {
-            // check if </head> already exists
-            $closeHeadIndex = array_search('</head>', $this->htmlElements);
             if ($closeHeadIndex === false || $closeHeadIndex > $bodyIndex) {
                 // Insert </head> just before <body>
                 array_splice($this->htmlElements, $bodyIndex, 0, ['</head>']);
             }
-        }
-        else if ($headIndex !== false && $bodyIndex !== false && $headIndex > $bodyIndex) {
-            // check if </head> already exists
-            $closeHeadIndex = array_search('</head>', $this->htmlElements);
+        } else if ($headIndex !== false && $bodyIndex !== false && $headIndex > $bodyIndex) {
             if ($closeHeadIndex === false) {
                 // Insert </head> just after <head>
                 array_splice($this->htmlElements, $headIndex + 1, 0, ['</head>']);
+            }
+        } else if ($headIndex !== false && $bodyIndex === false) {
+            $metaIndex = $this->findFirstElementStartingWith('<meta');          
+            $titleIndex = $this->findFirstElementStartingWith('<title');
+            if ($closeHeadIndex === false) {
+                if ($metaIndex !== false || $titleIndex !== false) {
+                    $insertIndex = max($metaIndex, $titleIndex) + 1;
+                    array_splice($this->htmlElements, $insertIndex, 0, ['</head>']);
+                } else {
+                    // Insert </head> just after <head>
+                    array_splice($this->htmlElements, $headIndex + 1, 0, ['</head>']);
+                }
             }
         }
     }
@@ -205,22 +210,30 @@ class Elem {
         return $newElements;
     }
 
+    private function findFirstElementStartingWith(string $prefix): int|false {
+        foreach ($this->htmlElements as $index => $element) {
+            if (str_starts_with($element, $prefix)) {
+                return $index;
+            }
+        }
+        return false;
+    }
+
     private function addOtherTags(string $value): void {
         if (in_array($this->element, $this->autoClosing)){
             $this->htmlElements[] = "{$value} {$this->content}/>";
         }   
-        elseif(in_array($this->element, $this->closingTags)){
+        elseif(in_array($this->element, $this->closingTags))
             $this->htmlElements[] = "{$value}>{$this->content}</{$this->element}>";
-        }
         elseif(in_array($this->element, $this->parentTags)){
-            if ($this->element === 'div' && !empty($this->content)) {
+            if ($this->element === 'div' && !empty($this->content)) 
                 $this->htmlElements[] = "{$value}>{$this->content}</{$this->element}>";
-            } elseif ($this->element === 'div' && empty($this->content)){
+            elseif ($this->element === 'div' && empty($this->content))
                 $this->htmlElements[] = "{$value}>";
-            } else {
-                $this->htmlElements[] = "{$value}>{$this->content}";
-            }
-        }
+            else 
+                $this->htmlElements[] = "{$value}>{$this->content}"; 
+        } 
+
     }
     
     private function initiateAttributes(array $a) : string {
@@ -240,7 +253,5 @@ class Elem {
         $indent = str_repeat(' ', $level);
         return $indent . $element . "\n";
     }
-
 }
-
 ?>

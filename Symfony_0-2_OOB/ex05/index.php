@@ -4,7 +4,7 @@ include('./TemplateEngine.php');
 
 try {
     $elem = new Elem('html');
-    // $body = new Elem('body');
+    $body = new Elem('body');
     // $body->pushElement(new Elem('p', 'Lorem ipsum', ['class'=> 'text-muted']));
     // $elem->pushElement($body);
     // echo $elem->getHTML();
@@ -14,17 +14,20 @@ try {
     // $file->createFile('test');
     print ("************************\n");
     $head = new Elem('head');
-    $meta = new Elem('meta', 'charset="UTF-8"');
+    $meta = new Elem('meta', 'charset="UTF-8"');    
+    $elem->pushElement($head);
+    $elem->pushElement($meta);
+    $elem->pushElement($body);
     $div1 = new Elem('div');
     // $span = new Elem('span', 'This is span sentence');
     // $div2 = new Elem('div');
     // $div1->pushElement($span);
-    $elem->pushElement($head);
-    // print_r($head->getHtmlElements());
-    $elem->pushElement($meta);
-    $elem->pushElement(new Elem('title', 'Fucking PHP'));
-    $elem->pushElement($div1);
 
+    // print_r($head->getHtmlElements());
+
+    // $elem->pushElement(new Elem('title', 'Fucking PHP'));
+    $elem->pushElement($div1);
+    $elem->pushElement(new Elem('p'));
     // $elem->pushElement($div2);
     //  print("\n6***********************\n");
     // $elem->pushElement(new Elem('img', '',["src"=> "image.jpg", "class" => "text-muted"]));
@@ -32,7 +35,10 @@ try {
     // $elem->pushElement(new Elem('ol'));
     // $elem->pushElement(new Elem('img', '',["src"=> "image_V2.jpg"]));
     // $elem->pushElement(new Elem('table', '', ["class" => "tabulation"]));
+     
     // $elem->pushElement(new Elem('tr'));
+    //   $elem->pushElement(new Elem('img', '',["src"=> "image.jpg", "class" => "text-muted"]));
+    // $elem->pushElement(new Elem('td', 'cellule 1'));
     // $elem->pushElement(new Elem('table'));
     // $elem->pushElement(new Elem('th', 'cellule 1'));
     // $th = new Elem('th', 'cellule 2');
@@ -45,6 +51,8 @@ try {
     // $elem->pushElement(new Elem('li', 'Ceci est une liste numerotée', ["class" => "text-muted"]));
     // $elem->pushElement(new Elem('img', '',["src"=> "image_V2.jpg"]));
     // $elem->pushElement(new Elem('li', 'This a html list'));
+    // $elem->pushElement(new Elem('li', 'This another html list'));
+        // $elem->pushElement(new Elem('ul'));
     echo $elem->getHTML();
     echo $elem->validPage() ? "This is a valid HTML page.\n" : "This is not a valid HTML page.\n";
 
