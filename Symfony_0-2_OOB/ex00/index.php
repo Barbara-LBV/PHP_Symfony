@@ -1,7 +1,6 @@
 <?php 
 
 include('./TemplateEngine.php');
-include('./book_description.html');
 
 $file = new TemplateEngine();
 

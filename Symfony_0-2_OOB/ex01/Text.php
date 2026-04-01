@@ -18,19 +18,34 @@ class Text{
         $this->_data = $array;
     }
 
-    public function append(string $new_data)
-    {
-        if (!is_string($new_data)) {
+
+    /**
+     * Appends a new string to the data array (Text attribute).
+     *
+     * @param string $newData : new string to append to the data array (Text attribute).
+     * @return bool : true if the string was appended successfully, false otherwise.
+     */
+
+    public function append(string $newData): bool {
+        if (!is_string($newData)) {
             print("Error: Element must be string.\n");
             return false;
         }
         
         if (empty($this->_data)) {
-            $this->_data = array($new_data);
+            $this->_data = array($newData);
         } else {
-            $this->_data[] = $new_data;
+            $this->_data[] = $newData;
         }
+        return true;
     }
+
+    
+    /**
+     * Reads the data from the data array (Text attribute).
+     *
+     * @return array : array of strings containing the data.
+     */
 
     public function readData(): array
     {

@@ -2,6 +2,15 @@
 
 class   TemplateEngine {
 
+    public function __construct() {}
+
+    /**
+     * Crée un fichier HTML en remplaçant les paramètres dans le template.
+     *
+     * @param string $fileName : file name of the generated HTML file.
+     * @param Text $text : Text object containing the data to render.
+     * @return bool : true if the file was created successfully, false otherwise.
+     */
 
     function createFile(string $fileName, Text $text): bool
     {

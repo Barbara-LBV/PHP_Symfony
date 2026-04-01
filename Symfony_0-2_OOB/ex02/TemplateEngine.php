@@ -4,6 +4,15 @@ include './HotBeverage.php';
 
 class   TemplateEngine{
 
+    public function __construct() {}
+
+    /**
+     * Creates an HTML file by replacing the parameters in the template.
+     *
+     * @param HotBeverage $text : HotBeverage object containing the data to render.
+     * @return bool : true if the file was created successfully, false otherwise.
+     */
+
     function createFile(HotBeverage $text): bool
     {
         if (!$text instanceof HotBeverage) {
@@ -34,18 +43,25 @@ class   TemplateEngine{
         $ordreredAttributes = ['name', 'price', 'resistance', 'description', 'comment'];
         $names = [];
         $values = [];
+        $propertyNames = [];
 
         foreach ($attributes as $attribute) {
-            $attribute->setAccessible(true);
-            $name = $attribute->getName();
-            $key = array_search($name, $ordreredAttributes);
-            
-            if ($key !== false) {
-                $names[$key] = '{' . $name . '}';
-                $values[$key] = $attribute->getValue($text);
-            } else {
-                print("Warning: Attribute '{$name}' is not in the ordered attributes list and will be ignored.\n");
+            $propertyNames[] = $attribute->getName();
+        }
+
+        foreach ($ordreredAttributes as $key => $attributeName) {
+            if (!in_array($attributeName, $propertyNames, true)) {
+                continue;
             }
+
+            $getterName = 'get' . ucfirst($attributeName);
+            if (!method_exists($text, $getterName)) {
+                print("Warning: Getter '{$getterName}' does not exist and will be ignored.\n");
+                continue;
+            }
+
+            $names[$key] = '{' . $attributeName . '}';
+            $values[$key] = $text->{$getterName}();
         }
 
         $content = str_replace($names, $values, $template);

@@ -1,29 +1,33 @@
-<?php 
+<?php
 
 #[Attribute(\Attribute::TARGET_CLASS)]
-class HotBeverage {
+class HotBeverage
+{
 
     protected string $name;
     protected float $price;
     protected float $resistance;
 
-    function __construct(string $name, float $price, float $resistance) {
+    function __construct(string $name, float $price, float $resistance)
+    {
         $this->name = $name;
         $this->price = $price;
         $this->resistance = $resistance;
     }
 
     // getters
-    function getPrice(): string {
+    function getPrice(): float
+    {
         return $this->price;
     }
 
-    function getName(): string {
+    function getName(): string
+    {
         return $this->name;
     }
 
-    function getResistance(): string {
+    function getResistance(): float
+    {
         return $this->resistance;
     }
 }
-?>
