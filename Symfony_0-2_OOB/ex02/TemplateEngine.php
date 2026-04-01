@@ -6,6 +6,8 @@ class   TemplateEngine{
 
     public function __construct() {}
 
+    public function __destruct() {}
+
     /**
      * Creates an HTML file by replacing the parameters in the template.
      *

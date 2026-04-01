@@ -10,7 +10,7 @@ echo $elem->getHTML();
 
 $file = new TemplateEngine($elem);
 $file->createFile('test');
-
+print ("************************\n");
 $meta = new Elem('meta', 'charset="UTF-8"');
 $div1 = new Elem('div', 'Machin et bidule');
 $span = new Elem('span', 'This is sentence');

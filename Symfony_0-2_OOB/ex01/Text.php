@@ -18,6 +18,7 @@ class Text{
         $this->_data = $array;
     }
 
+      public function __destruct() {}
 
     /**
      * Appends a new string to the data array (Text attribute).

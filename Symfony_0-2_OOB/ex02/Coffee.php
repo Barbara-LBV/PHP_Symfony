@@ -12,6 +12,8 @@ class Coffee extends HotBeverage {
         $this->comment = $comment;
     }
 
+    public function __destruct() {}
+
     // getters
     public function getDescription(): string {
         return $this->description;

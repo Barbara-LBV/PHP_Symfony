@@ -2,8 +2,9 @@
 
 class   TemplateEngine{
 
-    public function __construct()
-    {}
+    public function __construct() {}
+
+    public function __destruct() {}
 
     /**
      * Crée un fichier HTML en remplaçant les paramètres dans le template.

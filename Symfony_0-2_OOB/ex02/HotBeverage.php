@@ -15,6 +15,8 @@ class HotBeverage
         $this->resistance = $resistance;
     }
 
+    public function __destruct() {}
+
     // getters
     function getPrice(): float
     {

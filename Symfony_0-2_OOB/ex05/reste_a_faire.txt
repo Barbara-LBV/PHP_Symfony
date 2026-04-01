@@ -1,0 +1,39 @@
+Je vais vérifier factuellement ex05 (lint + exécution + lecture des règles codées) pour te dire précisément ce qui est conforme et ce qui ne l’est pas par rapport à la consigne.
+
+Ran terminal command:  cd /home/blefebvr/Documents/PHP_Symfony/PHP_Symfony/Symfony_0-2_OOB/ex05 && php -l Elem2.php && php -l TemplateEngine.php && php -l index.php && php index.php
+
+Ran terminal command:  nl -ba Elem2.php | sed -n '300,520p' && nl -ba index.php | sed -n '1,220p'
+
+Read [](file:///home/blefebvr/.config/Code/User/workspaceStorage/d482cd96c347478fffdf2bd88f920b8c/GitHub.copilot-chat/chat-session-resources/b26783fc-7deb-4b25-a2a1-93ef06ca76cc/call_S4XjZBr2orFuFVwCzmKHIs7S__vscode-1775046740973/content.txt)
+
+Pas encore conforme à 100% pour ex05.
+
+1. Règle html/head/body "exactement un head suivi d’un body" incomplète.
+Dans Elem2.php, la logique vérifie surtout des positions du premier head/body, mais ne vérifie pas qu’il y en a exactement un de chaque.
+
+2. Règle head "exactement un title et un meta charset" non respectée.
+Dans Elem2.php, tu vérifies la présence/position, mais pas l’unicité.  
+Tu ne vérifies pas non plus que le meta est bien un meta charset (attribut charset).
+
+3. Règle p "seulement du texte" non implémentée.
+Il n’y a pas de contrôle dédié qui interdit des balises imbriquées dans p.
+
+4. Règle table stricte incomplète.
+Dans Elem2.php, la validation travaille avec les premiers index trouvés seulement.  
+Ça ne garantit pas vraiment la structure complète table -> tr -> (th|td) sur l’ensemble du document.
+
+5. Règle ul/ol -> li incomplète.
+Même problème dans Elem2.php: contrôle basé sur premiers index, pas une traversée complète de tous les cas.
+
+6. Tests demandés par la consigne: insuffisants.
+Dans index.php, tu as un scénario manuel, mais pas une vraie série de tests couvrant chaque condition (cas valides + invalides distincts).
+
+7. Point secondaire.
+Le catch dans index.php intercepte TypeError au lieu de MyException, ce qui n’aide pas à tester les erreurs métier de balises invalides.
+
+Ce qui est déjà bon:
+1. La méthode validPage existe et renvoie booléen.
+2. Le flux actuel s’exécute et donne un verdict.
+3. La structure de validation est en place, mais elle doit être rendue plus stricte pour coller exactement à l’énoncé.
+
+Si tu veux, je peux te proposer une version minimale de validPage qui valide réellement toutes les règles de la consigne sans réécrire tout le moteur de rendu.

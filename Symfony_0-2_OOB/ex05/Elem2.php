@@ -55,21 +55,45 @@ class Elem {
         $this->result = $result;
     }
 
-    public function pushElement(Elem $elem): void {
-        if ($elem->htmlElements) {
-            foreach ($elem->htmlElements as $key => $value) {
-                if (in_array($value, $this->htmlElements))
-                    continue ;
-                else
-                    $this->htmlElements[] = $value; 
-            }
-        } else {
+    public function pushElement(Elem $elem): void
+    {
+        if (empty($elem->htmlElements)) {
             print("Error: Pushed Element has no HTML content.\n");
-            return ;
+            return;
         }
+
+        // getHTML() can inject the parent closing tag on a previous render.
+        // Remove only this parent closing to avoid deleting valid child closings.
+        $generatedClosings = ["</{$this->element}>"];
+        $this->htmlElements = array_values(array_filter(
+            $this->htmlElements,
+            function (string $value) use ($generatedClosings): bool {
+                return !in_array($value, $generatedClosings, true);
+            }
+        ));
+
+        // If stored as a single fully closed node (<div>...</div>), split it first.
+        if (count($this->htmlElements) === 1) {
+            $pattern = '/^(<' . preg_quote($this->element, '/') . '(?:\\s[^>]*)?>)(.*)<\\/'
+                . preg_quote($this->element, '/') . '>$/s';
+            if (preg_match($pattern, $this->htmlElements[0], $matches)) {
+                $this->htmlElements[0] = $matches[1] . $matches[2];
+                $this->htmlElements[] = "</{$this->element}>";
+            }
+        }
+
+        $closingTag = "</{$this->element}>";
+        $closingIndex = array_search($closingTag, $this->htmlElements, true);
+        if ($closingIndex !== false) {
+            array_splice($this->htmlElements, $closingIndex, 0, $elem->htmlElements);
+            return;
+        }
+
+        array_push($this->htmlElements, ...$elem->htmlElements);
     }
 
-    public function getHTML(): string {      
+    public function getHTML(): string
+    {
         if (empty($this->htmlElements)) {
             print("Error: No HTML elements to render.\n");
             return '';
@@ -394,6 +418,22 @@ class Elem {
         }
         return true;
     }
+
+    private function checkPBlock(): bool {
+        // Check if <p> tags contain text content 
+        $pOpenIndex = $this->findFirstElementStartingWith('<p');
+        $pCloseIndex = $this->findFirstElementStartingWith('</p>');
+
+        if (($pOpenIndex !== false && $pCloseIndex === false) || ($pOpenIndex === false && $pCloseIndex !== false)) {
+            print("Error: <p> tags must be properly opened and closed.\n");
+            return false;
+        } elseif ($pOpenIndex !== false && $pCloseIndex !== false && $pOpenIndex > $pCloseIndex) {
+            print("Error: <p> tag must be opened before it is closed.\n");
+            return false;
+        }
+        return true;    
+    }
+
 }
 
 ?>

@@ -2,8 +2,8 @@
 
 class MyException extends Exception {
 
-    public function __construct() {
-        parent::__construct("MyException: No valid tag found");
+    public function __construct(string $message = "MyException: No valid tag found") {
+        parent::__construct($message);
     }
 } 
 
