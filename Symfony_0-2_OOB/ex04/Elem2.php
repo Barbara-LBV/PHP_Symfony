@@ -11,10 +11,9 @@ class Elem {
     private array   $htmlElements = [];
 
     private array   $autoClosing = ['meta', 'br', 'hr', 'img'];
-    private array   $priorityTags = ['html', 'head', 'meta', 'title', 'body'];
     private array   $parentTags = ['html','body','div', 'table', 'tr', 'ol', 'ul'];
-    private array   $closingTags = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'li', 'span', 'th', 'td', 'p'];
-    private array   $tags = ['html', 'head', 'meta', 'title', 'body', 'div', 'p', 'img','hr', 'br', 
+    private array   $closingTags = ['title','h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'li', 'span', 'th', 'td', 'p'];
+    private array   $tags = ['html', 'head', 'meta', 'title', 'body', 'div', 'p', 'img', 'hr', 'br', 
     'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'table', 'tr', 'th', 'td', 'ul', 'ol', 'li'];
     
     public function __construct(string $element, string $content = '', array $attributes = []){
@@ -109,7 +108,7 @@ class Elem {
     }
 
     private function insertClosingHeadTag(): void {
-        // Insert </head> tag before <body> if necessary
+             // Insert </head> tag before <body> if necessary
         $headIndex = array_search('<head>', $this->htmlElements);
         $bodyIndex = array_search('<body>', $this->htmlElements);
 
@@ -121,6 +120,14 @@ class Elem {
             if ($closeHeadIndex === false || $closeHeadIndex > $bodyIndex) {
                 // Insert </head> just before <body>
                 array_splice($this->htmlElements, $bodyIndex, 0, ['</head>']);
+            }
+        }
+        else if ($headIndex !== false && $bodyIndex !== false && $headIndex > $bodyIndex) {
+            // check if </head> already exists
+            $closeHeadIndex = array_search('</head>', $this->htmlElements);
+            if ($closeHeadIndex === false) {
+                // Insert </head> just after <head>
+                array_splice($this->htmlElements, $headIndex + 1, 0, ['</head>']);
             }
         }
     }

@@ -11,10 +11,9 @@ class Elem {
     private array   $htmlElements = [];
 
     private array   $autoClosing = ['meta', 'br', 'hr', 'img'];
-    private array   $priorityTags = ['html', 'head', 'meta', 'title', 'body'];
-    private array   $parentTags = ['html','body','div', 'table', 'tr', 'ol', 'ul'];
-    private array   $closingTags = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'li', 'span', 'th', 'td', 'p'];
-    private array   $tags = ['html', 'head', 'meta', 'title', 'body', 'div', 'p', 'img','hr', 'br', 
+    private array   $parentTags = ['html','head','body','div', 'table', 'tr', 'ol', 'ul'];
+    private array   $closingTags = ['title', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'li', 'span', 'th', 'td', 'p'];
+    private array   $tags = ['html', 'head', 'meta', 'title', 'body', 'div', 'p', 'img', 'hr', 'br', 
     'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'table', 'tr', 'th', 'td', 'ul', 'ol', 'li'];
     
     public function __construct(string $element, string $content = '', array $attributes = []){
@@ -59,15 +58,12 @@ class Elem {
     public function pushElement(Elem $elem): void {
         if ($elem->htmlElements) {
             foreach ($elem->htmlElements as $key => $value) {
-                if (in_array($value, $this->htmlElements)) {
+                if (in_array($value, $this->htmlElements))
                     continue ;
-                }   
-                else {
+                else
                     $this->htmlElements[] = $value; 
-                } 
             }
-        } 
-        else {
+        } else {
             print("Error: Pushed Element has no HTML content.\n");
             return ;
         }
@@ -121,6 +117,14 @@ class Elem {
             if ($closeHeadIndex === false || $closeHeadIndex > $bodyIndex) {
                 // Insert </head> just before <body>
                 array_splice($this->htmlElements, $bodyIndex, 0, ['</head>']);
+            }
+        }
+        else if ($headIndex !== false && $bodyIndex !== false && $headIndex > $bodyIndex) {
+            // check if </head> already exists
+            $closeHeadIndex = array_search('</head>', $this->htmlElements);
+            if ($closeHeadIndex === false) {
+                // Insert </head> just after <head>
+                array_splice($this->htmlElements, $headIndex + 1, 0, ['</head>']);
             }
         }
     }
@@ -213,7 +217,8 @@ class Elem {
             } else {
                 $this->htmlElements[] = "{$value}>{$this->content}";
             }
-        }
+        } 
+
     }
     
     private function initiateAttributes(array $a) : string {
@@ -236,10 +241,9 @@ class Elem {
 
     public function validPage(): bool {
         $hasHtml = in_array('<html>', $this->htmlElements);
-        $hasBody = in_array('<body>', $this->htmlElements);
 
-        if (!$hasHtml || !$hasBody) {
-            print("Error: A valid HTML page must contain both <html> and <body> tags.\n");
+        if (!$hasHtml || array_search('<html>', $this->htmlElements) !== 0) {
+            print("Error: A valid HTML page must contain both <html> at index 0.\n");
             return false;
         }
 
@@ -267,8 +271,27 @@ class Elem {
     }
 
     private function checkHtmlBlock(): bool {
-        // Check if <html> tag is present and properly closed
         // Check if <head> and <body> tags are present and properly nested
+        $headOpenIndex = array_search('<head>', $this->htmlElements);
+        $headcloseIndex = array_search('</head>', $this->htmlElements);
+        $bodyIndex = array_search('<body>', $this->htmlElements);
+        // print("headOpenIndex: {$headOpenIndex}, headcloseIndex: {$headcloseIndex}, bodyIndex: {$bodyIndex}\n"); //debug
+
+        // check if head exists, it's directly placed after html tag
+        if ($headOpenIndex !== false && $headOpenIndex !== 1) {
+            echo "Error: <head> tag must be placed directly after <html> tag.\n";
+            return false;
+        }
+        // check if head is before body
+        if ($headOpenIndex !== false && $bodyIndex !== false && $headOpenIndex < $bodyIndex) {
+            echo "Error: <head> tag must be placed before <body> tag.\n";
+            return false;
+        }
+        // check if /head is before body
+        if ($headcloseIndex !== false && $bodyIndex !== false && $headcloseIndex > $bodyIndex) {
+            echo "Error: </head> tag must be placed before <body> tag.\n";
+            return false;  
+        }
         return true;
     }
 
