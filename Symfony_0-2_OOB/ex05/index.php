@@ -8,7 +8,7 @@ try {
     $elem->pushElement(new Elem('head'));
     $body = new Elem('body');
     // $body->pushElement(new Elem('p', '<span>oups</span>', ['class'=> 'text-muted']));
-    $body->pushElement(new Elem('p', '<li>This another html list</li>', ['class'=> 'text-muted']));
+    // $body->pushElement(new Elem('p', '<li>This another html list</li>', ['class'=> 'text-muted']));
     // $elem->pushElement($body);
     // echo $elem->getHTML();
     // $elem = new Elem('undefined'); // Leve une exception de type MyException$
@@ -38,16 +38,23 @@ try {
     // $elem->pushElement($div2);
     //  print("\n6***********************\n");
     // $elem->pushElement(new Elem('img', '',["src"=> "image.jpg", "class" => "text-muted"]));
+   
     // $elem->pushElement(new Elem('li', 'Ceci est une liste numerotée'));
-    // $elem->pushElement(new Elem('ol'));
+     $elem->pushElement(new Elem('ol'));
+    $elem->pushElement(new Elem('li', 'Ceci est une liste numerotée'));
+    $elem->pushElement(new Elem('li', 'Ceci est une liste numerotée1'));
+    $elem->pushElement(new Elem('li', 'Ceci est une liste numerotée2'));
+    $elem->pushElement(new Elem('li', 'Ceci est une liste numerotée3'));
+    //  $elem->pushElement(new Elem('ul'));
     // $elem->pushElement(new Elem('img', '',["src"=> "image_V2.jpg"]));
     // $elem->pushElement(new Elem('table', '', ["class" => "tabulation"]));
      
     // $elem->pushElement(new Elem('tr'));
     //   $elem->pushElement(new Elem('img', '',["src"=> "image.jpg", "class" => "text-muted"]));
-    // $elem->pushElement(new Elem('td', 'cellule 1'));
-    // $elem->pushElement(new Elem('table'));
-    // $elem->pushElement(new Elem('th', 'cellule 1'));
+    $elem->pushElement(new Elem('table'));
+    $elem->pushElement(new Elem('tr', 'cellule 1'));
+    
+    $elem->pushElement(new Elem('th', 'cellule 2'));
     // $th = new Elem('th', 'cellule 2');
     // $elem->pushElement(new Elem('tr'));
     // $elem->pushElement($th);

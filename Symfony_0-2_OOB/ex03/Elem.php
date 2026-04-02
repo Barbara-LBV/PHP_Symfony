@@ -85,22 +85,6 @@ class Elem
             }
         ));
 
-        // If stored as a single fully closed node (<div>...</div>), split it first.
-        if (count($this->htmlElements) === 1) {
-            $pattern = '/^(<' . preg_quote($this->element, '/') . '(?:\\s[^>]*)?>)(.*)<\\/'
-                . preg_quote($this->element, '/') . '>$/s';
-            if (preg_match($pattern, $this->htmlElements[0], $matches)) {
-                $this->htmlElements[0] = $matches[1] . $matches[2];
-                $this->htmlElements[] = "</{$this->element}>";
-            }
-        }
-
-        $closingTag = "</{$this->element}>";
-        $closingIndex = array_search($closingTag, $this->htmlElements, true);
-        if ($closingIndex !== false) {
-            array_splice($this->htmlElements, $closingIndex, 0, $elem->htmlElements);
-            return;
-        }
         // If no closing tag is found, append new elements (closing tag will be added on the next render if necessary)
         array_push($this->htmlElements, ...$elem->htmlElements);
     }
@@ -134,7 +118,7 @@ class Elem
                         array_splice($openTags, $key, 1);
                 }
             }
-            $result .= $this->indentElement($element, count($openTags) - 1);
+            $result .= $this->indentElement($element, count($openTags)-1);
         }
         $this->setResult($result);
         return $result;
@@ -174,8 +158,7 @@ class Elem
         }
     }
 
-    private function insertClosingParentTags(): void
-    {
+    private function insertClosingParentTags(): void {
         $stack = [];
         $newElements = [];
         $parentTags = ['div'];
@@ -277,7 +260,7 @@ class Elem
         }
     }
 
-        private function findFirstElementStartingWith(string $prefix): int|false {
+    private function findFirstElementStartingWith(string $prefix): int|false {
         foreach ($this->htmlElements as $index => $element) {
             if (str_starts_with($element, $prefix)) {
                 return $index;
