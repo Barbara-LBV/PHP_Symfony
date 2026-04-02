@@ -3,9 +3,12 @@
 include('./TemplateEngine.php');
 
 try {
+    
     $elem = new Elem('html');
+    $elem->pushElement(new Elem('head'));
     $body = new Elem('body');
-    // $body->pushElement(new Elem('p', 'Lorem ipsum', ['class'=> 'text-muted']));
+    // $body->pushElement(new Elem('p', '<span>oups</span>', ['class'=> 'text-muted']));
+    $body->pushElement(new Elem('p', '<li>This another html list</li>', ['class'=> 'text-muted']));
     // $elem->pushElement($body);
     // echo $elem->getHTML();
     // $elem = new Elem('undefined'); // Leve une exception de type MyException$
@@ -13,12 +16,16 @@ try {
     // $file = new TemplateEngine($elem);
     // $file->createFile('test');
     print ("************************\n");
-    $head = new Elem('head');
-    $meta = new Elem('meta', 'charset="UTF-8"');    
-    $elem->pushElement($head);
+    // $head = new Elem('head');
+    $meta = new Elem('meta', 'charset="UTF-8"'); 
+ 
+    // $elem->pushElement($head);
     $elem->pushElement($meta);
+    $elem->pushElement(new Elem('title', 'Fucking PHP'));
     $elem->pushElement($body);
+    // $elem->pushElement(new Elem('head'));
     $div1 = new Elem('div');
+    // $elem->pushElement(new Elem('html'));
     // $span = new Elem('span', 'This is span sentence');
     // $div2 = new Elem('div');
     // $div1->pushElement($span);
@@ -58,7 +65,7 @@ try {
 
     $file2 = new TemplateEngine($elem);
     $file2->createFile('test2');
-} catch (TypeError $e) {
+} catch (MyException $e) {
     echo $e->getMessage() . "\n";
 }
 

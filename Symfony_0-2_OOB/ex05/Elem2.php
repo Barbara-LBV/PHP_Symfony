@@ -234,8 +234,10 @@ class Elem {
         return $newElements;
     }
 
-    private function findFirstElementStartingWith(string $prefix): int|false {
-        foreach ($this->htmlElements as $index => $element) {
+    private function findFirstElementStartingWith(string $prefix, array $elements = []): int|false {
+        // if $elements array is provided, otherwise search in the htmlElements array
+        $searchArray = empty($elements) ? $this->htmlElements : $elements;
+        foreach ($searchArray as $index => $element) {
             if (str_starts_with($element, $prefix)) {
                 return $index;
             }
@@ -306,6 +308,10 @@ class Elem {
             print("Error: The list tags (<ul>, <ol>, <li>) are not properly structured.\n");
             return false;
         }
+        if (!$this->checkPBlock()) {
+            print("Error: The <p> block is not properly structured.\n");
+            return false;
+        }
         return true;
     }
 
@@ -314,21 +320,34 @@ class Elem {
         $headOpenIndex = $this->findFirstElementStartingWith('<head');
         $headcloseIndex = $this->findFirstElementStartingWith('</head>');
         $bodyIndex = $this->findFirstElementStartingWith('<body');
-
+        
         // check if head exists, it's directly placed after html tag
         if ($headOpenIndex !== false && $headOpenIndex !== 1) {
             echo "Error: <head> tag must be placed directly after <html> tag.\n";
             return false;
         }
-        // check if head is before body
-        if ($headOpenIndex !== false && $bodyIndex !== false && $headOpenIndex > $bodyIndex) {
-            echo "Error: <head> tag must be placed before <body> tag.\n";
-            return false;
-        }
+
         // check if /head is before body
         if ($headcloseIndex !== false && $bodyIndex !== false && $headcloseIndex > $bodyIndex) {
             echo "Error: </head> tag must be placed before <body> tag.\n";
             return false;  
+        }
+
+        $htmlElements = [];
+        $flagBody = 0;
+        $flagHead = 0;
+        for ($i = 0; $i < count($this->htmlElements); $i++) {
+            if (str_starts_with($this->htmlElements[$i], '<body')) {
+                $flagBody += 1;
+            } elseif (str_starts_with($this->htmlElements[$i], '<head')) {
+                $flagHead += 1;
+            }
+            $htmlElements[] = $this->htmlElements[$i];
+        }
+
+        if ($flagBody !== 1 || $flagHead !== 1) {
+            print("Error: <html> block cannot contain more than one <body> / <head> tags.\n");
+            return false;
         }
         return true;
     }
@@ -387,20 +406,34 @@ class Elem {
 
     private function checkHeadBlock(): bool {
         // Check if <meta> and <title> tags are present within <head>
-        $metaIndex= $this->findFirstElementStartingWith('<meta');
-        $titleIndex = $this->findFirstElementStartingWith('<title');
         $headIndex = array_search('<head>', $this->htmlElements);
 
-        if ($headIndex === false && ($metaIndex !== false || $titleIndex !== false)) {
+        if ($headIndex === false) {
             print("Error: <head> tag is missing.\n");
             return false;
-        } elseif ($headIndex !== false)  {
-            if (($metaIndex !== false && $metaIndex < $headIndex) || ($titleIndex !== false && $titleIndex < $headIndex)) {
-                print("Error: <meta> or <title> tag is not nested in <head> block.\n");
-                return false;
+        }
+
+        $headElements = [];
+        $flagMeta = 0;
+        $flagTitle = 0;
+        for ($i = $headIndex; $i < count($this->htmlElements); $i++) {
+            if ($this->htmlElements[$i] === '</head>') {
+                break;
             }
+            if (str_starts_with($this->htmlElements[$i], '<meta charset')) {
+                $flagMeta += 1;
+            } elseif (str_starts_with($this->htmlElements[$i], '<title')) {
+                $flagTitle += 1;
+            }
+            $headElements[] = $this->htmlElements[$i];
+        }
+
+        if ($flagMeta !== 1 || $flagTitle !== 1) {
+            print("Error: <head> block cannot contain more than one <meta> / <title> tags.\n");
+            return false;
         }
         return true;
+        
     }
     
     private function checkBodyBlock(): bool {
@@ -420,16 +453,15 @@ class Elem {
     }
 
     private function checkPBlock(): bool {
-        // Check if <p> tags contain text content 
-        $pOpenIndex = $this->findFirstElementStartingWith('<p');
-        $pCloseIndex = $this->findFirstElementStartingWith('</p>');
+        // Check if <p> tags contain no other tags
 
-        if (($pOpenIndex !== false && $pCloseIndex === false) || ($pOpenIndex === false && $pCloseIndex !== false)) {
-            print("Error: <p> tags must be properly opened and closed.\n");
-            return false;
-        } elseif ($pOpenIndex !== false && $pCloseIndex !== false && $pOpenIndex > $pCloseIndex) {
-            print("Error: <p> tag must be opened before it is closed.\n");
-            return false;
+        // Extract content of <p> tags... 
+        if(preg_match('/<p\b[^>]*>(.*?)<\/p>/s', implode('', $this->htmlElements), $matches)) {
+            // ... and check for potential nested tags
+            if (preg_match('/<[^>]+>/', $matches[1])) {
+                print("Error: <p> tags cannot contain other HTML tags.\n");
+                return false;
+            }
         }
         return true;    
     }
