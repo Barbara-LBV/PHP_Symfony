@@ -19,6 +19,8 @@ class Elem {
     public function __construct(string $element, string $content = '', array $attributes = []){
         if (!in_array($element, $this->tags))
             throw new MyException("Invalid HTML tag: {$element}");
+        if (in_array($element, ['html','head','table', 'tr', 'ol', 'ul']) && !empty($content))
+            throw new MyException("Parent tags cannot have content: {$element}");
 
         $this->element = $element;
         $this->content = $content;
@@ -85,8 +87,8 @@ class Elem {
         $result = '';
         $openTags = [];
 
-        $this->insertClosingHeadTag();
         $this->insertClosingParentTags();
+        $this->insertClosingHeadTag();
         foreach ($this->htmlElements as $element) {
             // Track open tags for indentation (already closed by insertClosingParentTags)
             if (!preg_match('/^<\//', $element)) { // open tag
@@ -146,35 +148,51 @@ class Elem {
     private function insertClosingParentTags(): void {
         $stack = [];
         $newElements = [];
-        $parentTags = ['div', 'table', 'tr', 'ol', 'ul'];
- 
+
         foreach ($this->htmlElements as $element) {
-            // get tag name from element using regex
-            if (preg_match('/^<(?!\/)(?![^>]*\/>)[a-zA-Z][a-zA-Z0-9]*\b[^>]*>\s*\S/s', $element)) {
-                // if there is content after the tag, add it to the new elements and continue
-                $newElements[] = $element;
+            // ignore les fermetures déjà présentes
+            if (preg_match('/^<\//', $element)) {
                 continue;
             }
+
+            $tag = null;
+            // check if the element is an opening tag and extract the tag name
             if (preg_match('/^<([a-zA-Z0-9]+)/', $element, $matches)) {
                 $tag = $matches[1];
-                if (in_array($tag, $parentTags)) {
-                    // if a parent tag is encountered, check if the previous one is the same and close it if necessary
-                    while (!empty($stack) && $stack[count($stack)-1] === $tag) {
-                        $newElements[] = "</$tag>";
-                        array_pop($stack);
-                    }
+            }
+
+            if ($tag !== null) {
+                // Close parent tags if the current tag is not allowed as a child
+                while (!empty($stack) && !$this->isAllowedChild($stack[count($stack) - 1], $tag)) {
+                    $newElements[] = '</' . array_pop($stack) . '>';
+                }
+
+                // Stack the current tag if it's a parent tag
+                if (in_array($tag, ['div', 'table', 'tr', 'ol', 'ul'], true)) {
                     $stack[] = $tag;
                 }
             }
             $newElements[] = $element;
         }
-        // close any remaining open parent tags
+
+        // Close any remaining open parent tags
         while (!empty($stack)) {
-            $tag = array_pop($stack);
-            $newElements[] = "</$tag>";
+            $newElements[] = '</' . array_pop($stack) . '>';
         }
-        $newElements = $this->insertClosingHtmlTag($newElements);
-        $this->htmlElements = $newElements;
+        $this->htmlElements = $this->insertClosingHtmlTag($newElements);
+    }
+
+    private function isAllowedChild(string $parent, string $child): bool {
+        if ($parent === 'ol' || $parent === 'ul') {
+            return $child === 'li';
+        }
+        if ($parent === 'table') {
+            return $child === 'tr';
+        }
+        if ($parent === 'tr') {
+            return $child === 'th' || $child === 'td';
+        }
+        return true; // div
     }
 
     private function insertClosingHtmlTag(array $newElements): array {
@@ -336,24 +354,6 @@ class Elem {
 
     private function checkTableTags(): bool {
         // Check if <tr>, <th>, and <td> tags are properly nested within <table>
-        $trIndex = $this->findFirstElementStartingWith('<tr');
-        $thIndex = $this->findFirstElementStartingWith('<th');
-        $tdIndex = $this->findFirstElementStartingWith('<td');
-        $tableIndex = $this->findFirstElementStartingWith('<table');
-
-        // check if <tr>, <th>, and <td> tags are present within a <table> tag
-        if (($trIndex !== false || $thIndex !== false || $tdIndex !== false) && $tableIndex === false) {
-            print("Error: <table> tag absent whereas <tr>, <th>, and <td> tags must be nested within a <table> block.\n");
-            return false;
-        } 
-        // check if <tr> and <th> tags are present without <td> tag
-        else if (($tdIndex !== false || $thIndex !== false) && $trIndex === false){
-            print("Error: <td> and <th> tags must be nested within a <tr> block.\n");
-            return false;
-        }
-
-        if ($trIndex !== false &&)
-        
         for ($i = 0; $i < count($this->htmlElements); $i++) {
             if (str_starts_with($this->htmlElements[$i], '<table')) {
                 if (!$this->checkParentTable($i+1, 'table')) {
@@ -364,6 +364,16 @@ class Elem {
             if (str_starts_with($this->htmlElements[$i], '<tr')) {
                 if (!$this->checkParentTable($i+1, 'tr')) {
                     print("Error: <tr> tags must be followed by a <th> or <td> tags.\n");
+                    return false;
+                }
+            }
+            if (str_starts_with($this->htmlElements[$i], '<th') || str_starts_with($this->htmlElements[$i], '<td')) {
+                for ($j = $i; $j > 0 ; $j--) {
+                    if (str_starts_with($this->htmlElements[$j],"<tr"))
+                        break ;
+                }
+                if (!$this->checkParentTable($j+1, 'tr')) {
+                    print("Error: <th> and <td> tags must be nested within a <tr> block.\n");
                     return false;
                 }
             }
@@ -385,17 +395,17 @@ class Elem {
             $Elem[] = $this->htmlElements[$i];
             $i++;
         }
+
         if (empty($Elem))
             return false;
 
         if ($tag === 'table') {
             if (!str_starts_with($Elem[0], '<tr')) {
-                return str_starts_with($Elem[0], '<tr');
+                return false;
             }
-        }
-        if ($tag === 'tr') {
+        } elseif ($tag === 'tr') {
             foreach($Elem as $elem) {
-                if (!str_starts_with($elem, '<th') || !str_starts_with($elem, '<td')) {
+                if (!str_starts_with($elem, '<th') && !str_starts_with($elem, '<td')) {
                     return false;
                 }
             }
@@ -502,11 +512,13 @@ class Elem {
         // Check if <p> tags contain no other tags
 
         // Extract content of <p> tags... 
-        if(preg_match('/<p\b[^>]*>(.*?)<\/p>/s', implode('', $this->htmlElements), $matches)) {
-            // ... and check for potential nested tags
-            if (preg_match('/<[^>]+>/', $matches[1])) {
-                print("Error: <p> tags cannot contain other HTML tags.\n");
-                return false;
+        foreach ($this->htmlElements as $element) {
+            if (preg_match('/<p\b[^>]*>(.*?)<\/p>/s', $element, $matches)) {
+                // ... and check for potential nested tags
+                if (preg_match('/<[^>]+>/', $matches[1])) {
+                    print("Error: <p> tags cannot contain other HTML tags.\n");
+                    return false;
+                }
             }
         }
         return true;    

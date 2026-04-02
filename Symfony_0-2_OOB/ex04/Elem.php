@@ -19,6 +19,8 @@ class Elem {
     public function __construct(string $element, string $content = '', array $attributes = []){
         if (!in_array($element, $this->tags))
             throw new MyException("Invalid HTML tag: {$element}");
+        if (in_array($element, ['html','head','table', 'tr', 'ol', 'ul']) && !empty($content))
+            throw new MyException("Parent tags cannot have content: {$element}");
 
         $this->element = $element;
         $this->content = $content;

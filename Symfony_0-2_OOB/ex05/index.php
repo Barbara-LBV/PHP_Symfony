@@ -40,11 +40,11 @@ try {
     // $elem->pushElement(new Elem('img', '',["src"=> "image.jpg", "class" => "text-muted"]));
    
     // $elem->pushElement(new Elem('li', 'Ceci est une liste numerotée'));
-     $elem->pushElement(new Elem('ol'));
-    $elem->pushElement(new Elem('li', 'Ceci est une liste numerotée'));
-    $elem->pushElement(new Elem('li', 'Ceci est une liste numerotée1'));
-    $elem->pushElement(new Elem('li', 'Ceci est une liste numerotée2'));
-    $elem->pushElement(new Elem('li', 'Ceci est une liste numerotée3'));
+    //  $elem->pushElement(new Elem('ol'));
+    // $elem->pushElement(new Elem('li', 'Ceci est une liste numerotée'));
+    // $elem->pushElement(new Elem('li', 'Ceci est une liste numerotée1'));
+    // $elem->pushElement(new Elem('li', 'Ceci est une liste numerotée2'));
+    // $elem->pushElement(new Elem('li', 'Ceci est une liste numerotée3'));
     //  $elem->pushElement(new Elem('ul'));
     // $elem->pushElement(new Elem('img', '',["src"=> "image_V2.jpg"]));
     // $elem->pushElement(new Elem('table', '', ["class" => "tabulation"]));
@@ -52,15 +52,16 @@ try {
     // $elem->pushElement(new Elem('tr'));
     //   $elem->pushElement(new Elem('img', '',["src"=> "image.jpg", "class" => "text-muted"]));
     $elem->pushElement(new Elem('table'));
-    $elem->pushElement(new Elem('tr', 'cellule 1'));
+    $elem->pushElement(new Elem('tr'));
     
     $elem->pushElement(new Elem('th', 'cellule 2'));
-    // $th = new Elem('th', 'cellule 2');
+    $th = new Elem('th', 'cellule 2');
     // $elem->pushElement(new Elem('tr'));
     // $elem->pushElement($th);
-    // $elem->pushElement(new Elem('td', 'cell division 1'));
-    // $elem->pushElement(new Elem('tr', '', ["class" => "table-primary"]));
-    // $elem->pushElement(new Elem('th', 'cellule 3'));
+    $elem->pushElement(new Elem('td', 'cell division 1'));
+    $elem->pushElement(new Elem('tr', '', ["class" => "table-primary"]));
+    //    $elem->pushElement(new Elem('ul'));
+    $elem->pushElement(new Elem('th', 'cellule 3'));
     // $elem->pushElement($body);
     // $elem->pushElement(new Elem('li', 'Ceci est une liste numerotée', ["class" => "text-muted"]));
     // $elem->pushElement(new Elem('img', '',["src"=> "image_V2.jpg"]));
