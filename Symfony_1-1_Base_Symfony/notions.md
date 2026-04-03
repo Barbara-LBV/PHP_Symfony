@@ -25,3 +25,15 @@ symfony server:start -d
 ``` bash
 symfony server:stop
 ```
+
+## Les Templates Twig
+
+### Heritage
+
+Toutes les templates qui heritent de base.html.twig doivent commencer par :
+
+```html
+{% extends "base.html.twig" %}
+```
+
+Les templates remplacent ensuite les "blocks" du fichier base...

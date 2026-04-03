@@ -8,7 +8,7 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class FirstPageController extends AbstractController
 {
-    #[Route('/e00/firstpage', name: 'firstpage')]
+    #[Route('/e00/firstPage', name: 'firstpage')]
     public function show(): Response
     {
         $render = $this->render('firstpage.html.twig');

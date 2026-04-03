@@ -23,7 +23,7 @@ class ArticleController extends AbstractController
     }
 
     #[Route('/e01/miziaki', name: 'miziaki')]
-    public function showMiziaki(): Response
+    public function showMiazaki(): Response
     {
         $render = $this->render('articleMiazaki.html.twig');
         return $render;
@@ -35,13 +35,14 @@ class ArticleController extends AbstractController
         $render = $this->render('articleJackson.html.twig');
         return $render;
     }
+    
     // Wrong url
-//    #[Route('/e01/wrongUrl', name: 'wrongurl')]
-//    public function showWrongurl(): Response
-//    {
-//        $render = $this->render('home.html.twig');
-//        return $render;
-//    }
+   #[Route('/e01/wrongUrl', name: 'wrongurl')]
+   public function showWrongurl(): Response
+   {
+       $render = $this->render('home.html.twig');
+       return $render;
+   }
 
 }
 ?>
