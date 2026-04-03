@@ -1,0 +1,33 @@
+# yaml-language-server: $schema=../vendor/symfony/routing/Loader/schema/routing.schema.json
+
+# This file is the entry point to configure the routes of your app.
+# Methods with the #[Route] attribute are automatically imported.
+# See also https://symfony.com/doc/current/routing.html
+
+# To list all registered routes, run the following command:
+#   bin/console debug:router
+
+controllers:
+    resource: routing.controllers
+
+# The "first_page" route is defined in the src/Controller/FirstPageController.php file
+
+first_page:
+    path: e00/firstPage
+    controller: App\Controller\FirstPageController::show
+
+e01:
+    path: e01/
+    controller: App\Controller\ArticleController::showHome
+
+e01_article1:
+    path: e01/deltoro/
+    controller: App\Controller\ArticleController::showDelToro
+
+e01_article2:
+    path: e01/miazaki
+    controller: App\Controller\ArticleController::showMiazaki
+
+e01_article3:
+    path: e01/jackson
+    controller: App\Controller\ArticleController::showJackson
