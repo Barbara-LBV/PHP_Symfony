@@ -7,7 +7,7 @@ class   TemplateEngine {
     public function __destruct() {}
 
     /**
-     * Crée un fichier HTML en remplaçant les paramètres dans le template.
+     * Create an HTML file based on a Text object.
      *
      * @param string $fileName : file name of the generated HTML file.
      * @param Text $text : Text object containing the data to render.

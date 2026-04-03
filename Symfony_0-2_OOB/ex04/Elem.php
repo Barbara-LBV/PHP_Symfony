@@ -87,8 +87,9 @@ class Elem {
         $result = '';
         $openTags = [];
 
-        $this->insertClosingHeadTag();
         $this->insertClosingParentTags();
+        $this->insertClosingHeadTag();
+        
         foreach ($this->htmlElements as $element) {
             // Track open tags for indentation (already closed by insertClosingParentTags)
             if (!preg_match('/^<\//', $element)) { // open tag

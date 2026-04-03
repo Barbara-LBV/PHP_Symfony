@@ -62,7 +62,7 @@ class Text{
 
         $size = count($content) - 1;
 
-        // Remove the last empty element if it exists
+        // Remove the last eventual empty string from the content array
         if ($size >= 0)
             $content[$size] = trim($content[$size]);
 

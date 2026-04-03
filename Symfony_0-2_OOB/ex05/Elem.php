@@ -168,7 +168,8 @@ class Elem {
                 }
 
                 // Stack the current tag if it's a parent tag
-                if (in_array($tag, ['div', 'table', 'tr', 'ol', 'ul'], true)) {
+                $isInlineClosedTag = preg_match('/<\/' . preg_quote($tag, '/') . '>\s*$/', $element) === 1;
+                if (in_array($tag, ['div', 'table', 'tr', 'ol', 'ul'], true) && !$isInlineClosedTag) {
                     $stack[] = $tag;
                 }
             }
@@ -346,7 +347,7 @@ class Elem {
         }
 
         if ($flagBody !== 1 || $flagHead !== 1) {
-            print("Error: <html> block cannot contain more than one <body> / <head> tags.\n");
+            print("Error: <html> block has to contain exactly one <head> and one <body> tags.\n");
             return false;
         }
         return true;
@@ -516,7 +517,7 @@ class Elem {
             if (preg_match('/<p\b[^>]*>(.*?)<\/p>/s', $element, $matches)) {
                 // ... and check for potential nested tags
                 if (preg_match('/<[^>]+>/', $matches[1])) {
-                    print("Error: <p> tags cannot contain other HTML tags.\n");
+                    print("Error: <p> tags cannot nest other HTML tags.\n");
                     return false;
                 }
             }
